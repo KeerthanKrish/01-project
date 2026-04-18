@@ -1,0 +1,1484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marketplace Item Detector - Enhanced</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 1400px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+
+        .badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            margin-top: 10px;
+        }
+
+        .content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            padding: 30px;
+        }
+
+        .video-section, .results-section {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .video-container {
+            position: relative;
+            background: #000;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        #webcam {
+            width: 100%;
+            height: auto;
+            display: block;
+            transition: transform 0.3s ease;
+        }
+
+        .video-overlay {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 8px;
+            font-size: 0.9em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #10b981;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .controls {
+            margin-top: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .control-label {
+            font-size: 0.9em;
+            color: #6b7280;
+            font-weight: 500;
+        }
+
+        .rotation-controls {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+        }
+
+        .rotation-btn {
+            padding: 10px;
+            background: #f3f4f6;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: 500;
+            color: #374151;
+        }
+
+        .rotation-btn:hover {
+            background: #e5e7eb;
+        }
+
+        .rotation-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .detail-controls {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+
+        .detail-btn {
+            padding: 10px;
+            background: #f3f4f6;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: 500;
+            color: #374151;
+            font-size: 0.9em;
+        }
+
+        .detail-btn:hover {
+            background: #e5e7eb;
+        }
+
+        .detail-btn.active {
+            background: #10b981;
+            color: white;
+            border-color: #10b981;
+        }
+
+        .flash-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            padding: 12px;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            cursor: pointer;
+            font-size: 1.5em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+
+        .flash-btn:hover {
+            background: rgba(0, 0, 0, 0.8);
+            transform: scale(1.1);
+        }
+
+        .flash-btn.active {
+            background: rgba(251, 191, 36, 0.9);
+            border-color: rgba(251, 191, 36, 1);
+            box-shadow: 0 0 20px rgba(251, 191, 36, 0.6);
+        }
+
+        .flash-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .capture-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 18px 40px;
+            border-radius: 12px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .capture-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(102, 126, 234, 0.6);
+        }
+
+        .capture-btn:active {
+            transform: translateY(0);
+        }
+
+        .capture-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .analyze-btn {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            border: none;
+            padding: 18px 40px;
+            border-radius: 12px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 20px rgba(16, 185, 129, 0.4);
+        }
+
+        .analyze-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(16, 185, 129, 0.6);
+        }
+
+        .analyze-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .clear-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 0.95em;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .clear-btn:hover {
+            background: #dc2626;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+            padding: 15px;
+            background: #f3f4f6;
+            border-radius: 10px;
+            min-height: 80px;
+        }
+
+        .gallery.empty {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #9ca3af;
+            font-size: 0.9em;
+        }
+
+        .gallery-item {
+            position: relative;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: all 0.2s ease;
+        }
+
+        .gallery-item:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .gallery-item-remove {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            background: #ef4444;
+            color: white;
+            border: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 16px;
+            line-height: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .gallery-item:hover .gallery-item-remove {
+            opacity: 1;
+        }
+
+        .gallery-item-number {
+            position: absolute;
+            bottom: 4px;
+            left: 4px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.75em;
+            font-weight: 600;
+        }
+
+        .image-counter {
+            text-align: center;
+            color: #6b7280;
+            font-size: 0.9em;
+            margin-top: 10px;
+        }
+
+        .results-section h2 {
+            color: #1f2937;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+
+        .results-container {
+            background: #f9fafb;
+            border-radius: 15px;
+            padding: 25px;
+            min-height: 500px;
+            max-height: 70vh;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #9ca3af;
+            text-align: center;
+        }
+
+        .placeholder-icon {
+            font-size: 4em;
+            margin-bottom: 15px;
+        }
+
+        .result-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            border-left: 4px solid #667eea;
+        }
+
+        .result-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .result-item:last-child {
+            border-bottom: none;
+        }
+
+        .result-label {
+            color: #6b7280;
+            font-weight: 500;
+        }
+
+        .result-value {
+            color: #1f2937;
+            font-weight: 600;
+        }
+
+        .confidence-bar {
+            width: 100%;
+            height: 6px;
+            background: #e5e7eb;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+
+        .confidence-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #10b981 0%, #34d399 100%);
+            transition: width 0.3s ease;
+        }
+
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 30px;
+            color: #667eea;
+            font-weight: 500;
+        }
+
+        .spinner {
+            width: 24px;
+            height: 24px;
+            border: 3px solid #e5e7eb;
+            border-top-color: #667eea;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .error {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #dc2626;
+        }
+
+        .tier-badge {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.75em;
+            font-weight: 600;
+        }
+
+        .reasoning {
+            background: #f3f4f6;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+            font-size: 0.9em;
+            color: #4b5563;
+            font-style: italic;
+        }
+
+        .detail-list {
+            background: #fef3c7;
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+            border-left: 3px solid #f59e0b;
+        }
+
+        .detail-list-title {
+            font-weight: 600;
+            color: #92400e;
+            margin-bottom: 8px;
+        }
+
+        .detail-list ul {
+            margin-left: 20px;
+            color: #78350f;
+        }
+
+        .detail-list li {
+            margin: 4px 0;
+        }
+
+        @media (max-width: 1068px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎥 Marketplace Item Detector</h1>
+            <p>Capture items with flash control, rotation, and detailed analysis for ALL categories</p>
+            <div class="badge">
+                Backend: <span id="backend">{{ 'OpenAI Vision' if use_openai else 'CLIP' }}</span>
+            </div>
+        </div>
+
+        <div class="content">
+            <div class="video-section">
+                <div class="video-container">
+                    <video id="webcam" autoplay playsinline></video>
+                    <button id="flashBtn" class="flash-btn" title="Toggle Flash">💡</button>
+                    <div class="video-overlay">
+                        <div class="status-dot"></div>
+                        <span>Live</span>
+                    </div>
+                </div>
+                
+                <div class="controls">
+                    <div class="control-group">
+                        <div class="control-label">🔄 Rotation (live preview + captured image)</div>
+                        <div class="rotation-controls">
+                            <button class="rotation-btn active" data-rotation="0">0°</button>
+                            <button class="rotation-btn" data-rotation="90">90°</button>
+                            <button class="rotation-btn" data-rotation="180">180°</button>
+                            <button class="rotation-btn" data-rotation="270">270°</button>
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <div class="control-label">🔍 Analysis Detail Level</div>
+                        <div class="detail-controls">
+                            <button class="detail-btn" data-detail="quick">Quick</button>
+                            <button class="detail-btn active" data-detail="normal">Normal</button>
+                            <button class="detail-btn" data-detail="detailed">Detailed</button>
+                        </div>
+                    </div>
+
+                    <div class="button-group">
+                        <button id="captureBtn" class="capture-btn" style="flex: 1;">
+                            📸 Add Photo
+                        </button>
+                    </div>
+                    
+                    <div id="gallery" class="gallery empty">
+                        No images captured yet
+                    </div>
+                    
+                    <div class="image-counter">
+                        <span id="imageCount">0</span> image(s) captured
+                    </div>
+
+                    <div class="button-group">
+                        <button id="analyzeBtn" class="analyze-btn" disabled style="flex: 1;">
+                            🚀 Analyze All Images
+                        </button>
+                        <button id="clearBtn" class="clear-btn">
+                            🗑️ Clear
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="results-section">
+                <h2>Detection Results</h2>
+                <div id="results" class="results-container">
+                    <div class="placeholder">
+                        <div class="placeholder-icon">📦</div>
+                        <p>Capture an image to see detection results</p>
+                        <p style="font-size: 0.9em; margin-top: 10px;">Adjust rotation and detail level before capturing</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const webcam = document.getElementById('webcam');
+        const captureBtn = document.getElementById('captureBtn');
+        const analyzeBtn = document.getElementById('analyzeBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const flashBtn = document.getElementById('flashBtn');
+        const gallery = document.getElementById('gallery');
+        const imageCount = document.getElementById('imageCount');
+        const resultsDiv = document.getElementById('results');
+        
+        let currentRotation = 0;
+        let currentDetailLevel = 'normal';
+        let capturedImages = [];
+        let flashEnabled = false;
+        let videoTrack = null;
+
+        // Rotation control
+        document.querySelectorAll('.rotation-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.rotation-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentRotation = parseInt(btn.dataset.rotation);
+                
+                // Update webcam display rotation
+                webcam.style.transform = `rotate(${currentRotation}deg)`;
+            });
+        });
+
+        // Detail level control
+        document.querySelectorAll('.detail-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.detail-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentDetailLevel = btn.dataset.detail;
+            });
+        });
+
+        // Flash/Torch control
+        flashBtn.addEventListener('click', async () => {
+            if (!videoTrack) return;
+            
+            try {
+                const capabilities = videoTrack.getCapabilities();
+                
+                // Check if torch is supported
+                if (!capabilities.torch) {
+                    alert('Flash/torch not supported on this device');
+                    flashBtn.disabled = true;
+                    return;
+                }
+                
+                // Toggle flash
+                flashEnabled = !flashEnabled;
+                await videoTrack.applyConstraints({
+                    advanced: [{ torch: flashEnabled }]
+                });
+                
+                // Update button state
+                if (flashEnabled) {
+                    flashBtn.classList.add('active');
+                    flashBtn.textContent = '🔦';
+                } else {
+                    flashBtn.classList.remove('active');
+                    flashBtn.textContent = '💡';
+                }
+                
+            } catch (err) {
+                console.error('Error toggling flash:', err);
+                alert('Failed to toggle flash. Your device may not support this feature.');
+            }
+        });
+
+        // Initialize webcam
+        async function initWebcam() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { 
+                        width: { ideal: 1920 },
+                        height: { ideal: 1080 }
+                    } 
+                });
+                webcam.srcObject = stream;
+                
+                // Store video track for flash control
+                videoTrack = stream.getVideoTracks()[0];
+                
+                // Check if flash is available
+                const capabilities = videoTrack.getCapabilities();
+                if (!capabilities.torch) {
+                    flashBtn.disabled = true;
+                    flashBtn.style.opacity = '0.3';
+                }
+                
+            } catch (err) {
+                console.error('Error accessing webcam:', err);
+                resultsDiv.innerHTML = `
+                    <div class="error">
+                        <strong>Camera Error:</strong> Unable to access webcam. 
+                        Please check permissions and try again.
+                    </div>
+                `;
+            }
+        }
+
+        // Apply rotation to canvas
+        function rotateCanvas(canvas, rotation) {
+            if (rotation === 0) return canvas;
+
+            const rotatedCanvas = document.createElement('canvas');
+            const ctx = rotatedCanvas.getContext('2d');
+
+            if (rotation === 90 || rotation === 270) {
+                rotatedCanvas.width = canvas.height;
+                rotatedCanvas.height = canvas.width;
+            } else {
+                rotatedCanvas.width = canvas.width;
+                rotatedCanvas.height = canvas.height;
+            }
+
+            ctx.translate(rotatedCanvas.width / 2, rotatedCanvas.height / 2);
+            ctx.rotate((rotation * Math.PI) / 180);
+            ctx.drawImage(canvas, -canvas.width / 2, -canvas.height / 2);
+
+            return rotatedCanvas;
+        }
+
+        // Capture single image and add to gallery
+        function captureImage() {
+            const canvas = document.createElement('canvas');
+            canvas.width = webcam.videoWidth;
+            canvas.height = webcam.videoHeight;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(webcam, 0, 0);
+            
+            const finalCanvas = rotateCanvas(canvas, currentRotation);
+            const imageData = finalCanvas.toDataURL('image/jpeg', 0.95);
+            
+            capturedImages.push(imageData);
+            updateGallery();
+            analyzeBtn.disabled = false;
+            
+            captureBtn.textContent = '✅ Added!';
+            setTimeout(() => { captureBtn.textContent = '📸 Add Photo'; }, 500);
+        }
+
+        // Update gallery display
+        function updateGallery() {
+            imageCount.textContent = capturedImages.length;
+            
+            if (capturedImages.length === 0) {
+                gallery.className = 'gallery empty';
+                gallery.innerHTML = 'No images captured yet';
+                analyzeBtn.disabled = true;
+                return;
+            }
+            
+            gallery.className = 'gallery';
+            gallery.innerHTML = '';
+            
+            capturedImages.forEach((imgData, index) => {
+                const item = document.createElement('div');
+                item.className = 'gallery-item';
+                
+                const img = document.createElement('img');
+                img.src = imgData;
+                
+                const number = document.createElement('div');
+                number.className = 'gallery-item-number';
+                number.textContent = `#${index + 1}`;
+                
+                const removeBtn = document.createElement('button');
+                removeBtn.className = 'gallery-item-remove';
+                removeBtn.innerHTML = '×';
+                removeBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    capturedImages.splice(index, 1);
+                    updateGallery();
+                };
+                
+                item.appendChild(img);
+                item.appendChild(number);
+                item.appendChild(removeBtn);
+                gallery.appendChild(item);
+            });
+        }
+
+        // Clear all images
+        function clearGallery() {
+            capturedImages = [];
+            updateGallery();
+            resultsDiv.innerHTML = `
+                <div class="placeholder">
+                    <div class="placeholder-icon">📦</div>
+                    <p>Capture multiple angles of your product</p>
+                    <p style="font-size: 0.9em; margin-top: 10px;">Tip: Take 2-4 photos from different angles for best results</p>
+                </div>
+            `;
+        }
+
+        // Analyze all captured images
+        async function analyzeAllImages() {
+            if (capturedImages.length === 0) return;
+            
+            analyzeBtn.disabled = true;
+            captureBtn.disabled = true;
+            analyzeBtn.textContent = '⏳ Analyzing...';
+
+            resultsDiv.innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <span>Processing ${capturedImages.length} image(s) with ${currentDetailLevel} analysis...</span>
+                </div>
+            `;
+
+            try {
+                const response = await fetch('/detect', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        images: capturedImages,
+                        rotation: currentRotation,
+                        detail_level: currentDetailLevel
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    displayResults(result);
+                } else {
+                    throw new Error(result.error || 'Detection failed');
+                }
+
+            } catch (err) {
+                console.error('Error:', err);
+                resultsDiv.innerHTML = `
+                    <div class="error">
+                        <strong>Error:</strong> ${err.message}
+                    </div>
+                `;
+            } finally {
+                analyzeBtn.disabled = false;
+                captureBtn.disabled = false;
+                analyzeBtn.textContent = '🚀 Analyze All Images';
+            }
+        }
+
+        // Display detection results
+        function displayResults(data) {
+            const tier1 = data.tier1;
+            const tier2 = data.tier2;
+            
+            let html = '';
+
+            if (data.images_analyzed > 1) {
+                html += `
+                    <div style="background: #dbeafe; padding: 12px; border-radius: 8px; margin-bottom: 15px; text-align: center; color: #1e40af; font-weight: 500;">
+                        📐 Multi-Angle Analysis: ${data.images_analyzed} images analyzed together
+                    </div>
+                `;
+            }
+
+            html += `
+                <div class="result-card">
+                    <div class="result-header">
+                        <span class="tier-badge">TIER 1</span>
+                        Category Detection
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Category</span>
+                        <span class="result-value">${tier1.category}</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Confidence</span>
+                        <div style="flex: 1; margin-left: 20px;">
+                            <span class="result-value">${(tier1.confidence * 100).toFixed(1)}%</span>
+                            <div class="confidence-bar">
+                                <div class="confidence-fill" style="width: ${tier1.confidence * 100}%"></div>
+                            </div>
+                        </div>
+                    </div>
+            `;
+
+            if (tier1.reasoning) {
+                html += `<div class="reasoning">💭 ${tier1.reasoning}</div>`;
+            }
+
+            html += `</div>`;
+
+            if (tier2 && !tier2.error) {
+                html += `
+                    <div class="result-card">
+                        <div class="result-header">
+                            <span class="tier-badge">TIER 2</span>
+                            Detailed Analysis (${data.detail_level})
+                        </div>
+                `;
+
+                if (tier2.brand) {
+                    html += `<div class="result-item" style="background: #fef3c7; padding: 15px; margin: -5px -5px 10px -5px; border-radius: 8px;">
+                        <span class="result-label" style="font-size: 1.1em; color: #92400e;">🏷️ Brand (Priority)</span>
+                        <span class="result-value" style="font-size: 1.1em; color: #92400e;">${tier2.brand}</span>
+                    </div>`;
+                    if (tier2.brand_confidence) {
+                        html += `<div style="padding: 0 10px 15px;">
+                            <span style="font-size: 0.85em; color: #78350f;">Confidence: ${(tier2.brand_confidence * 100).toFixed(1)}%</span>
+                            <div class="confidence-bar">
+                                <div class="confidence-fill" style="width: ${tier2.brand_confidence * 100}%; background: linear-gradient(90deg, #f59e0b 0%, #fbbf24 100%);"></div>
+                            </div>
+                        </div>`;
+                    }
+                    if (tier2.brand_source) {
+                        html += `<div style="padding: 0 10px 15px; font-size: 0.9em; color: #78350f; font-style: italic;">📍 Source: ${tier2.brand_source}</div>`;
+                    } else if (tier2.brand_reasoning) {
+                        html += `<div style="padding: 0 10px 15px; font-size: 0.9em; color: #78350f; font-style: italic;">💡 ${tier2.brand_reasoning}</div>`;
+                    }
+                }
+
+                if (tier2.product_type) {
+                    html += `<div class="result-item" style="background: #fef3c7; padding: 15px; margin: 0 -5px 10px -5px; border-radius: 8px;">
+                        <span class="result-label" style="font-size: 1.1em; color: #92400e;">📱 Product Type (Priority)</span>
+                        <span class="result-value" style="font-size: 1.1em; color: #92400e;">${tier2.product_type}</span>
+                    </div>`;
+                    if (tier2.product_type_confidence) {
+                        html += `<div style="padding: 0 10px 15px;">
+                            <span style="font-size: 0.85em; color: #78350f;">Confidence: ${(tier2.product_type_confidence * 100).toFixed(1)}%</span>
+                            <div class="confidence-bar">
+                                <div class="confidence-fill" style="width: ${tier2.product_type_confidence * 100}%; background: linear-gradient(90deg, #f59e0b 0%, #fbbf24 100%);"></div>
+                            </div>
+                        </div>`;
+                    }
+                    if (tier2.product_type_reasoning) {
+                        html += `<div style="padding: 0 10px 15px; font-size: 0.9em; color: #78350f; font-style: italic;">💡 ${tier2.product_type_reasoning}</div>`;
+                    }
+                }
+
+                if (tier2.multi_angle_benefits) {
+                    html += `<div style="background: #dbeafe; padding: 12px; border-radius: 8px; margin: 0 0 15px 0; border-left: 3px solid #3b82f6;">
+                        <div style="font-weight: 600; color: #1e40af; margin-bottom: 5px;">📐 Multi-Angle Benefits:</div>
+                        <div style="color: #1e40af; font-size: 0.9em;">${tier2.multi_angle_benefits}</div>
+                    </div>`;
+                }
+
+                if (tier2.model) html += `<div class="result-item"><span class="result-label">Model</span><span class="result-value">${tier2.model}</span></div>`;
+                if (tier2.material) html += `<div class="result-item"><span class="result-label">Material</span><span class="result-value">${tier2.material}</span></div>`;
+                if (tier2.color) html += `<div class="result-item"><span class="result-label">Color</span><span class="result-value">${tier2.color}</span></div>`;
+                if (tier2.size_or_dimensions) html += `<div class="result-item"><span class="result-label">Size</span><span class="result-value">${tier2.size_or_dimensions}</span></div>`;
+                if (tier2.condition) html += `<div class="result-item"><span class="result-label">Condition</span><span class="result-value">${tier2.condition}</span></div>`;
+                
+                // TEXT READING - High priority display
+                if (tier2.visible_text_found && tier2.visible_text_found.length > 0) {
+                    html += `<div class="detail-list" style="background: #e0f2fe; border-left-color: #0284c7;">
+                        <div class="detail-list-title">📖 All Text Found on Product:</div>
+                        <ul style="margin-left: 15px; margin-top: 5px;">
+                            ${tier2.visible_text_found.map(text => `<li><strong>${text}</strong></li>`).join('')}
+                        </ul>
+                        <div style="font-size: 0.85em; margin-top: 8px; color: #075985; font-style: italic;">
+                            This text was used to identify brand and product details
+                        </div>
+                    </div>`;
+                }
+
+                if (tier2.stickers_present && tier2.stickers_present.length > 0) {
+                    html += `<div class="detail-list" style="background: #fef3c7; border-left-color: #f59e0b;">
+                        <div class="detail-list-title">🏷️ Stickers Detected (Ignored for brand):</div>
+                        <ul>${tier2.stickers_present.map(s => `<li>${s}</li>`).join('')}</ul>
+                        <div style="font-size: 0.85em; margin-top: 5px; font-style: italic;">Brand based on genuine markings</div>
+                    </div>`;
+                }
+                
+                // PHYSICAL DAMAGE INSPECTION - New detailed breakdown
+                if (tier2.general_physical_damage) {
+                    const gpd = tier2.general_physical_damage;
+                    let hasDamage = false;
+                    
+                    html += `<div class="detail-list" style="background: #fee2e2; border-left-color: #dc2626;">
+                        <div class="detail-list-title">🔍 General Physical Damage Inspection:</div>`;
+                    
+                    if (gpd.scratches && gpd.scratches.length > 0) {
+                        hasDamage = true;
+                        html += `<div style="margin: 8px 0;">
+                            <strong style="color: #dc2626;">Scratches:</strong>
+                            <ul style="margin-left: 15px; margin-top: 3px;">
+                                ${gpd.scratches.map(s => `<li>${s}</li>`).join('')}
+                            </ul>
+                        </div>`;
+                    }
+                    
+                    if (gpd.dents && gpd.dents.length > 0) {
+                        hasDamage = true;
+                        html += `<div style="margin: 8px 0;">
+                            <strong style="color: #dc2626;">Dents:</strong>
+                            <ul style="margin-left: 15px; margin-top: 3px;">
+                                ${gpd.dents.map(d => `<li>${d}</li>`).join('')}
+                            </ul>
+                        </div>`;
+                    }
+                    
+                    if (gpd.scuffs && gpd.scuffs.length > 0) {
+                        hasDamage = true;
+                        html += `<div style="margin: 8px 0;">
+                            <strong style="color: #dc2626;">Scuffs:</strong>
+                            <ul style="margin-left: 15px; margin-top: 3px;">
+                                ${gpd.scuffs.map(s => `<li>${s}</li>`).join('')}
+                            </ul>
+                        </div>`;
+                    }
+                    
+                    if (gpd.discoloration && gpd.discoloration.length > 0) {
+                        hasDamage = true;
+                        html += `<div style="margin: 8px 0;">
+                            <strong style="color: #dc2626;">Discoloration:</strong>
+                            <ul style="margin-left: 15px; margin-top: 3px;">
+                                ${gpd.discoloration.map(d => `<li>${d}</li>`).join('')}
+                            </ul>
+                        </div>`;
+                    }
+                    
+                    if (gpd.cracks_or_chips && gpd.cracks_or_chips.length > 0) {
+                        hasDamage = true;
+                        html += `<div style="margin: 8px 0;">
+                            <strong style="color: #dc2626;">Cracks/Chips:</strong>
+                            <ul style="margin-left: 15px; margin-top: 3px;">
+                                ${gpd.cracks_or_chips.map(c => `<li>${c}</li>`).join('')}
+                            </ul>
+                        </div>`;
+                    }
+                    
+                    if (gpd.other_damage && gpd.other_damage.length > 0) {
+                        hasDamage = true;
+                        html += `<div style="margin: 8px 0;">
+                            <strong style="color: #dc2626;">Other Damage:</strong>
+                            <ul style="margin-left: 15px; margin-top: 3px;">
+                                ${gpd.other_damage.map(o => `<li>${o}</li>`).join('')}
+                            </ul>
+                        </div>`;
+                    }
+                    
+                    if (!hasDamage) {
+                        html += `<div style="font-size: 0.95em; color: #059669; margin: 8px 0;">
+                            ✅ No significant general physical damage detected
+                        </div>`;
+                    }
+                    
+                    html += `</div>`;
+                } else if (tier2.physical_damage_inspection) {
+                    // Legacy support for old field name
+                    const pdi = tier2.physical_damage_inspection;
+                    let hasDamage = false;
+                    
+                    html += `<div class="detail-list" style="background: #fee2e2; border-left-color: #dc2626;">
+                        <div class="detail-list-title">🔍 Physical Damage Inspection:</div>`;
+                    
+                    if (pdi.scratches && pdi.scratches.length > 0) {
+                        hasDamage = true;
+                        html += `<div style="margin: 8px 0;">
+                            <strong style="color: #dc2626;">Scratches:</strong>
+                            <ul style="margin-left: 15px; margin-top: 3px;">
+                                ${pdi.scratches.map(s => `<li>${s}</li>`).join('')}
+                            </ul>
+                        </div>`;
+                    }
+                    
+                    if (pdi.dents && pdi.dents.length > 0) {
+                        hasDamage = true;
+                        html += `<div style="margin: 8px 0;">
+                            <strong style="color: #dc2626;">Dents:</strong>
+                            <ul style="margin-left: 15px; margin-top: 3px;">
+                                ${pdi.dents.map(d => `<li>${d}</li>`).join('')}
+                            </ul>
+                        </div>`;
+                    }
+                    
+                    if (pdi.scuffs && pdi.scuffs.length > 0) {
+                        hasDamage = true;
+                        html += `<div style="margin: 8px 0;">
+                            <strong style="color: #dc2626;">Scuffs:</strong>
+                            <ul style="margin-left: 15px; margin-top: 3px;">
+                                ${pdi.scuffs.map(s => `<li>${s}</li>`).join('')}
+                            </ul>
+                        </div>`;
+                    }
+                    
+                    if (pdi.discoloration && pdi.discoloration.length > 0) {
+                        hasDamage = true;
+                        html += `<div style="margin: 8px 0;">
+                            <strong style="color: #dc2626;">Discoloration:</strong>
+                            <ul style="margin-left: 15px; margin-top: 3px;">
+                                ${pdi.discoloration.map(d => `<li>${d}</li>`).join('')}
+                            </ul>
+                        </div>`;
+                    }
+                    
+                    if (pdi.cracks_or_chips && pdi.cracks_or_chips.length > 0) {
+                        hasDamage = true;
+                        html += `<div style="margin: 8px 0;">
+                            <strong style="color: #dc2626;">Cracks/Chips:</strong>
+                            <ul style="margin-left: 15px; margin-top: 3px;">
+                                ${pdi.cracks_or_chips.map(c => `<li>${c}</li>`).join('')}
+                            </ul>
+                        </div>`;
+                    }
+                    
+                    if (pdi.other_damage && pdi.other_damage.length > 0) {
+                        hasDamage = true;
+                        html += `<div style="margin: 8px 0;">
+                            <strong style="color: #dc2626;">Other Damage:</strong>
+                            <ul style="margin-left: 15px; margin-top: 3px;">
+                                ${pdi.other_damage.map(o => `<li>${o}</li>`).join('')}
+                            </ul>
+                        </div>`;
+                    }
+                    
+                    if (!hasDamage) {
+                        html += `<div style="font-size: 0.95em; color: #059669; margin: 8px 0;">
+                            ✅ No significant physical damage detected
+                        </div>`;
+                    }
+                    
+                    html += `</div>`;
+                }
+                
+                // Overall wear assessment
+                if (tier2.overall_wear_assessment) {
+                    html += `<div class="detail-list" style="background: #fef9c3; border-left-color: #eab308;">
+                        <div class="detail-list-title">📋 Overall Wear Assessment:</div>
+                        <div style="font-size: 0.95em; color: #713f12; padding: 5px 0;">
+                            ${tier2.overall_wear_assessment}
+                        </div>
+                    </div>`;
+                }
+                
+                // Functionality assessment
+                if (tier2.functionality_assessment) {
+                    const fa = tier2.functionality_assessment;
+                    html += `<div class="detail-list" style="background: ${fa.appears_functional ? '#ecfdf5' : '#fee2e2'}; border-left-color: ${fa.appears_functional ? '#10b981' : '#ef4444'};">
+                        <div class="detail-list-title">⚙️ Functionality Assessment:</div>
+                        
+                        <div style="margin: 8px 0;">
+                            <strong style="font-size: 1.1em; color: ${fa.appears_functional ? '#047857' : '#dc2626'};">
+                                ${fa.appears_functional ? '✅ Appears Functional' : '❌ Functionality Concerns'}
+                            </strong>
+                        </div>`;
+                    
+                    if (fa.confidence) {
+                        html += `<div style="margin: 8px 0; font-size: 0.9em; color: #6b7280;">
+                            Confidence: ${(fa.confidence * 100).toFixed(0)}%
+                        </div>`;
+                    }
+                    
+                    if (fa.reasoning) {
+                        html += `<div style="margin: 8px 0; font-size: 0.95em; color: #374151;">
+                            <strong>Reasoning:</strong> ${fa.reasoning}
+                        </div>`;
+                    }
+                    
+                    if (fa.concerns && fa.concerns.length > 0) {
+                        html += `<div style="margin: 8px 0;">
+                            <strong style="color: #dc2626;">Concerns:</strong>
+                            <ul style="margin-left: 15px; margin-top: 3px;">
+                                ${fa.concerns.map(c => `<li style="color: #991b1b;">${c}</li>`).join('')}
+                            </ul>
+                        </div>`;
+                    }
+                    
+                    html += `</div>`;
+                }
+                
+                // Physical damage by angle (multi-angle specific)
+                if (tier2.physical_damage_by_angle) {
+                    const pdba = tier2.physical_damage_by_angle;
+                    html += `<div class="detail-list" style="background: #fce7f3; border-left-color: #ec4899;">
+                        <div class="detail-list-title">📐 Damage Found Per Angle:</div>`;
+                    
+                    Object.keys(pdba).forEach(key => {
+                        if (key !== 'combined_summary' && pdba[key] && pdba[key].length > 0) {
+                            html += `<div style="margin: 8px 0;">
+                                <strong style="color: #831843;">${key.replace('_', ' ')}:</strong>
+                                <ul style="margin-left: 15px; margin-top: 3px;">
+                                    ${pdba[key].map(item => `<li>${item}</li>`).join('')}
+                                </ul>
+                            </div>`;
+                        }
+                    });
+                    
+                    if (pdba.combined_summary && pdba.combined_summary.length > 0) {
+                        html += `<div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #f9a8d4;">
+                            <strong style="color: #831843;">Complete Summary:</strong>
+                            <ul style="margin-left: 15px; margin-top: 3px;">
+                                ${pdba.combined_summary.map(item => `<li><strong>${item}</strong></li>`).join('')}
+                            </ul>
+                        </div>`;
+                    }
+                    
+                    html += `</div>`;
+                }
+
+                // PRODUCT-SPECIFIC WEAR ANALYSIS - New dynamic analysis
+                if (tier2.product_specific_wear_analysis) {
+                    const pswa = tier2.product_specific_wear_analysis;
+                    html += `<div class="detail-list" style="background: #fef3c7; border-left-color: #f59e0b;">
+                        <div class="detail-list-title">🔬 Product-Specific Wear Analysis</div>
+                        
+                        <div style="background: white; padding: 10px; border-radius: 6px; margin: 8px 0;">
+                            <strong style="color: #92400e;">Product Identified:</strong> ${pswa.product_identified || tier2.product_type}
+                        </div>`;
+                    
+                    if (pswa.typical_wear_points_for_this_product && pswa.typical_wear_points_for_this_product.length > 0) {
+                        html += `<div style="margin: 10px 0;">
+                            <strong style="color: #78350f;">Typical Wear Points for This Product:</strong>
+                            <ul style="margin-left: 15px; margin-top: 5px; font-size: 0.9em;">
+                                ${pswa.typical_wear_points_for_this_product.map(point => `<li style="color: #713f12;">${point}</li>`).join('')}
+                            </ul>
+                        </div>`;
+                    } else if (pswa.typical_wear_points && pswa.typical_wear_points.length > 0) {
+                        html += `<div style="margin: 10px 0;">
+                            <strong style="color: #78350f;">Typical Wear Points:</strong>
+                            <ul style="margin-left: 15px; margin-top: 5px; font-size: 0.9em;">
+                                ${pswa.typical_wear_points.map(point => `<li style="color: #713f12;">${point}</li>`).join('')}
+                            </ul>
+                        </div>`;
+                    }
+                    
+                    if (pswa.inspection_results && pswa.inspection_results.length > 0) {
+                        html += `<div style="margin: 10px 0;">
+                            <strong style="color: #78350f;">Detailed Inspection Results:</strong>`;
+                        
+                        pswa.inspection_results.forEach(result => {
+                            const statusColors = {
+                                'excellent': '#10b981',
+                                'good': '#3b82f6',
+                                'fair': '#f59e0b',
+                                'poor': '#ef4444',
+                                'not_visible': '#6b7280'
+                            };
+                            const statusColor = statusColors[result.status?.toLowerCase()] || '#6b7280';
+                            
+                            html += `<div style="background: white; padding: 8px; margin: 6px 0; border-radius: 4px; border-left: 3px solid ${statusColor};">
+                                <div style="font-weight: 600; color: #1f2937;">
+                                    ${result.wear_point || 'Unknown part'}
+                                    <span style="background: ${statusColor}; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.85em; margin-left: 8px;">
+                                        ${result.status || 'Unknown'}
+                                    </span>
+                                </div>`;
+                            
+                            if (result.details) {
+                                html += `<div style="font-size: 0.9em; color: #4b5563; margin-top: 4px;">${result.details}</div>`;
+                            }
+                            
+                            if (result.severity && result.severity !== 'none') {
+                                html += `<div style="font-size: 0.85em; color: #ef4444; margin-top: 2px;">
+                                    Severity: ${result.severity}
+                                </div>`;
+                            }
+                            
+                            if (result.affects_function !== undefined) {
+                                html += `<div style="font-size: 0.85em; color: ${result.affects_function ? '#ef4444' : '#10b981'}; margin-top: 2px;">
+                                    ${result.affects_function ? '⚠️ May affect functionality' : '✅ Does not affect functionality'}
+                                </div>`;
+                            }
+                            
+                            if (result.visible_in_images) {
+                                html += `<div style="font-size: 0.8em; color: #6b7280; margin-top: 2px;">
+                                    Visible in image(s): ${result.visible_in_images.join(', ')}
+                                </div>`;
+                            }
+                            
+                            html += `</div>`;
+                        });
+                        
+                        html += `</div>`;
+                    } else if (pswa.inspection_results_by_angle && pswa.inspection_results_by_angle.length > 0) {
+                        html += `<div style="margin: 10px 0;">
+                            <strong style="color: #78350f;">Inspection Results:</strong>`;
+                        
+                        pswa.inspection_results_by_angle.forEach(result => {
+                            const statusColors = {
+                                'excellent': '#10b981',
+                                'good': '#3b82f6',
+                                'fair': '#f59e0b',
+                                'poor': '#ef4444'
+                            };
+                            const statusColor = statusColors[result.status?.toLowerCase()] || '#6b7280';
+                            
+                            html += `<div style="background: white; padding: 8px; margin: 6px 0; border-radius: 4px; border-left: 3px solid ${statusColor};">
+                                <div style="font-weight: 600; color: #1f2937;">
+                                    ${result.wear_point}
+                                    <span style="background: ${statusColor}; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.85em; margin-left: 8px;">
+                                        ${result.status}
+                                    </span>
+                                </div>
+                                <div style="font-size: 0.9em; color: #4b5563; margin-top: 4px;">${result.details}</div>
+                            </div>`;
+                        });
+                        
+                        html += `</div>`;
+                    }
+                    
+                    if (pswa.summary) {
+                        html += `<div style="background: #fffbeb; padding: 10px; border-radius: 6px; margin-top: 10px; border: 1px solid #fde68a;">
+                            <strong style="color: #78350f;">Summary:</strong>
+                            <div style="color: #713f12; margin-top: 4px; font-size: 0.95em;">${pswa.summary}</div>
+                        </div>`;
+                    }
+                    
+                    html += `</div>`;
+                }
+                
+                // Legacy product_specific_wear (for backwards compatibility)
+                if (!tier2.product_specific_wear_analysis && tier2.product_specific_wear) {
+                    const psw = tier2.product_specific_wear;
+                    html += `<div class="detail-list" style="background: #fee2e2; border-left-color: #dc2626;">
+                        <div class="detail-list-title">🔍 ${psw.category || 'Product'}-Specific Wear Inspection:</div>`;
+                    
+                    if (psw.common_wear_items_checked && psw.common_wear_items_checked.length > 0) {
+                        html += `<div style="font-size: 0.9em; margin-bottom: 8px;"><strong>Checked:</strong>
+                            <ul style="margin-left: 15px; margin-top: 5px;">
+                                ${psw.common_wear_items_checked.slice(0, 5).map(item => `<li>${item}</li>`).join('')}
+                                ${psw.common_wear_items_checked.length > 5 ? `<li>...and ${psw.common_wear_items_checked.length - 5} more</li>` : ''}
+                            </ul></div>`;
+                    }
+                    
+                    if (psw.issues_found && psw.issues_found.length > 0) {
+                        html += `<div style="font-size: 0.9em; background: white; padding: 8px; border-radius: 4px; margin-top: 8px;">
+                            <strong style="color: #dc2626;">⚠️ Issues Found:</strong>
+                            <ul style="margin-left: 15px; margin-top: 5px;">
+                                ${psw.issues_found.map(issue => `<li><strong>${issue}</strong></li>`).join('')}
+                            </ul></div>`;
+                    } else if (psw.wear_found && psw.wear_found.length > 0) {
+                        html += `<div style="font-size: 0.9em; background: white; padding: 8px; border-radius: 4px; margin-top: 8px;">
+                            <strong style="color: #dc2626;">⚠️ Wear Found:</strong>
+                            <ul style="margin-left: 15px; margin-top: 5px;">
+                                ${psw.wear_found.map(wear => `<li><strong>${wear}</strong></li>`).join('')}
+                            </ul></div>`;
+                    } else {
+                        html += `<div style="font-size: 0.9em; color: #059669; margin-top: 5px;">✅ No significant wear detected</div>`;
+                    }
+                    html += `</div>`;
+                }
+
+                if (tier2.condition_notes && tier2.condition_notes.length > 0) {
+                    html += `<div class="detail-list"><div class="detail-list-title">⚠️ Condition Notes:</div><ul>${tier2.condition_notes.map(n => `<li>${n}</li>`).join('')}</ul></div>`;
+                }
+
+                if (tier2.physical_damage && tier2.physical_damage.length > 0) {
+                    html += `<div class="detail-list"><div class="detail-list-title">🔍 Visible Damage:</div><ul>${tier2.physical_damage.map(d => `<li>${d}</li>`).join('')}</ul></div>`;
+                }
+
+                if (tier2.visible_text && tier2.visible_text.length > 0) {
+                    html += `<div class="detail-list"><div class="detail-list-title">📝 Other Visible Text:</div><ul>${tier2.visible_text.map(t => `<li>${t}</li>`).join('')}</ul></div>`;
+                }
+                
+                // Marketplace assessment
+                if (tier2.marketplace_assessment) {
+                    const ma = tier2.marketplace_assessment;
+                    html += `<div class="detail-list" style="background: #ecfdf5; border-left-color: #10b981;">
+                        <div class="detail-list-title">💰 Marketplace Assessment:</div>`;
+                    
+                    if (ma.cosmetic_grade) {
+                        const gradeColors = {
+                            'A': '#10b981',
+                            'B': '#3b82f6',
+                            'C': '#f59e0b',
+                            'D': '#ef4444'
+                        };
+                        const grade = ma.cosmetic_grade.charAt(0).toUpperCase();
+                        html += `<div style="margin: 8px 0;">
+                            <strong>Cosmetic Grade:</strong>
+                            <span style="background: ${gradeColors[grade] || '#6b7280'}; color: white; padding: 4px 12px; border-radius: 6px; margin-left: 8px; font-weight: bold;">
+                                ${ma.cosmetic_grade}
+                            </span>
+                        </div>`;
+                    }
+                    
+                    if (ma.appears_functional !== undefined) {
+                        html += `<div style="margin: 8px 0;">
+                            <strong>Functional:</strong> ${ma.appears_functional ? '✅ Yes' : '❌ No'}
+                        </div>`;
+                    }
+                    
+                    if (ma.completeness) {
+                        html += `<div style="margin: 8px 0;">
+                            <strong>Completeness:</strong> ${ma.completeness}
+                        </div>`;
+                    }
+                    
+                    if (ma.cleanliness) {
+                        html += `<div style="margin: 8px 0;">
+                            <strong>Cleanliness:</strong> ${ma.cleanliness}
+                        </div>`;
+                    }
+                    
+                    if (ma.major_concerns && ma.major_concerns.length > 0) {
+                        html += `<div style="margin: 8px 0;">
+                            <strong style="color: #ef4444;">⚠️ Major Concerns:</strong>
+                            <ul style="margin-left: 15px; margin-top: 3px;">
+                                ${ma.major_concerns.map(c => `<li>${c}</li>`).join('')}
+                            </ul>
+                        </div>`;
+                    }
+                    
+                    if (ma.selling_points && ma.selling_points.length > 0) {
+                        html += `<div style="margin: 8px 0;">
+                            <strong style="color: #10b981;">✨ Selling Points:</strong>
+                            <ul style="margin-left: 15px; margin-top: 3px;">
+                                ${ma.selling_points.map(s => `<li>${s}</li>`).join('')}
+                            </ul>
+                        </div>`;
+                    }
+                    
+                    html += `</div>`;
+                }
+
+                if (tier2.visible_details && tier2.visible_details.length > 0) {
+                    html += `<div class="detail-list"><div class="detail-list-title">🔍 Visible Details:</div><ul>${tier2.visible_details.map(d => `<li>${d}</li>`).join('')}</ul></div>`;
+                }
+
+                if (tier2.features && tier2.features.length > 0) {
+                    html += `<div class="detail-list"><div class="detail-list-title">✨ Features:</div><ul>${tier2.features.map(f => `<li>${f}</li>`).join('')}</ul></div>`;
+                }
+
+                if (tier2.recommended_additional_angles && tier2.recommended_additional_angles.length > 0) {
+                    html += `<div style="background: #fef3c7; padding: 12px; border-radius: 8px; margin-top: 10px; border-left: 3px solid #f59e0b;">
+                        <div style="font-weight: 600; color: #92400e; margin-bottom: 5px;">💡 Suggested Additional Photos:</div>
+                        <ul style="margin-left: 20px; color: #78350f;">
+                            ${tier2.recommended_additional_angles.map(angle => `<li>${angle}</li>`).join('')}
+                        </ul>
+                    </div>`;
+                }
+
+                if (tier2.reasoning || tier2.detailed_analysis) {
+                    html += `<div class="reasoning">💭 ${tier2.detailed_analysis || tier2.reasoning}</div>`;
+                }
+
+                html += `</div>`;
+            }
+
+            if (data.saved_paths && data.saved_paths.length > 0) {
+                html += `
+                    <div style="background: white; padding: 15px; border-radius: 8px; margin-top: 10px;">
+                        <div style="font-weight: 600; color: #1f2937; margin-bottom: 8px;">💾 Saved ${data.saved_paths.length} Images:</div>
+                        <div style="font-size: 0.85em; color: #6b7280;">
+                            ${data.saved_paths.map((path, i) => `<div style="margin: 3px 0;">Image ${i+1}: ${path.split('\\').pop()}</div>`).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            resultsDiv.innerHTML = html;
+        }
+
+        captureBtn.addEventListener('click', captureImage);
+        analyzeBtn.addEventListener('click', analyzeAllImages);
+        clearBtn.addEventListener('click', clearGallery);
+        initWebcam();
+    </script>
+</body>
+</html>

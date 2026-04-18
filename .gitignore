@@ -75,3 +75,16 @@ htmlcov/
 # OS files
 Thumbs.db
 .DS_Store
+
+# Captured images (user data - exclude from git)
+images/*.jpg
+images/*.jpeg
+images/*.png
+images/*.gif
+images/*.bmp
+images/*.webp
+!images/.gitkeep
+
+# Analysis JSON outputs (user data - exclude from git)
+jsons/*.json
+!jsons/.gitkeep

@@ -123,13 +123,24 @@ class UniversalDetailedDetector:
                 return result
                 
             except Exception as e:
-                warnings.warn(f"OpenAI API error: {str(e)}")
+                error_msg = str(e)
+                warnings.warn(f"OpenAI API error (single-image): {error_msg}")
+                
+                # Log more details for debugging
+                print(f"❌ Single-image detection failed: {error_msg}")
+                print(f"   - Detail level: {detail_level}")
+                print(f"   - Category: {category}")
+                
                 return {
                     "product_type": "unknown",
                     "brand": "unknown",
                     "condition": "unknown",
                     "overall_confidence": 0.0,
-                    "error": str(e),
+                    "error": error_msg,
+                    "error_details": {
+                        "detail_level": detail_level,
+                        "category": category
+                    },
                     "processing_time_ms": timer.elapsed_ms,
                     "category": category
                 }
@@ -145,19 +156,30 @@ class UniversalDetailedDetector:
 READ EVERY PIECE OF VISIBLE TEXT on this product:
 • Brand names (printed, embossed, etched, labeled)
 • Model numbers or product codes
+• **SKU numbers / Barcodes / UPC codes** (VERY IMPORTANT!)
 • Size labels or measurements
 • Material descriptions
 • Warning labels
 • Any other text or numbers
 
+⚠️ SPECIAL ATTENTION TO BARCODES/SKU:
+Look for numeric codes near barcode symbols (usually 12-13 digits).
+These provide definitive product identification!
+Common formats:
+• UPC: 12 digits (e.g., 012345678905)
+• EAN: 13 digits (e.g., 0123456789012)
+• SKU: Variable length alphanumeric
+
 THEN for each piece of text found:
 1. Is it a brand name? → Use as brand identification
-2. Is it a model/product name? → Use for specific product type
-3. Is it a size/spec? → Include in details
-4. Is it care instructions? → Note the material info
+2. **Is it a barcode/SKU number? → RECORD IT (critical for product ID)**
+3. Is it a model/product name? → Use for specific product type
+4. Is it a size/spec? → Include in details
+5. Is it care instructions? → Note the material info
 
 ⚠️ CRITICAL: Text-based identification is MORE RELIABLE than visual guessing.
 If you see "Stanley", "Hydro Flask", "YETI", etc. → That's the brand!
+If you see a 12-13 digit number near a barcode → RECORD IT!
 
 🔴 MANDATORY STEP 2: BRAND & PRODUCT IDENTIFICATION
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -227,8 +249,11 @@ RESPOND IN THIS EXACT JSON FORMAT (FILL EVERY FIELD):
     "visible_text_found": [
         "List EVERY piece of text you can read",
         "Include brand names, model numbers, size labels",
+        "**INCLUDE any barcode/UPC/EAN numbers (12-13 digits)**",
         "Even partial text or numbers"
     ],
+    
+    "barcode_sku_found": "If you see a barcode number (12-13 digits), write it here. Otherwise: null",
     
     "product_specific_wear_analysis": {{
         "product_identified": "specific product name",
@@ -296,9 +321,10 @@ RESPOND IN THIS EXACT JSON FORMAT (FILL EVERY FIELD):
         else:  # quick or normal
             prompt = f"""PROFESSIONAL {category.upper()} APPRAISAL - PRODUCT-SPECIFIC ANALYSIS
 
-STEP 1 - READ ALL TEXT:
-Look for brand names, model numbers, size labels, any text on the product.
+STEP 1 - READ ALL TEXT (INCLUDING BARCODES!):
+Look for brand names, model numbers, size labels, **barcode/SKU numbers**, any text on the product.
 Text = most reliable way to identify brand!
+Barcodes = definitive product identification!
 
 STEP 2 - IDENTIFY SPECIFIC PRODUCT:
 Not just "{category}" - what EXACT product is this?
@@ -326,7 +352,8 @@ RESPOND IN JSON:
     
     "condition": "Excellent/Good/Fair/Poor",
     
-    "visible_text_found": ["list ALL visible text"],
+    "visible_text_found": ["list ALL visible text including any barcode numbers"],
+    "barcode_sku_found": "12-13 digit barcode/UPC/EAN if visible, otherwise: null",
     
     "product_specific_wear_analysis": {{
         "product_identified": "specific product",
@@ -408,10 +435,20 @@ CRITICAL:
                 })
             
             try:
+                # Scale max_tokens based on number of images
+                # More images = more detail to describe
+                base_tokens = 3000 if detail_level == "detailed" else 2000
+                tokens_per_image = 150  # Extra tokens per additional image
+                max_tokens_calculated = base_tokens + (len(images) * tokens_per_image)
+                # Cap at OpenAI's limit
+                max_tokens_final = min(max_tokens_calculated, 4000)
+                
+                print(f"🔧 Using {max_tokens_final} max tokens for {len(images)} images")
+                
                 response = self.client.chat.completions.create(
                     model=self.model,
                     messages=[{"role": "user", "content": content}],
-                    max_tokens=2000 if detail_level == "detailed" else 1000,
+                    max_tokens=max_tokens_final,
                     temperature=0.1
                 )
                 
@@ -436,13 +473,26 @@ CRITICAL:
                 return result
                 
             except Exception as e:
-                warnings.warn(f"OpenAI API error: {str(e)}")
+                error_msg = str(e)
+                warnings.warn(f"OpenAI API error (multi-angle): {error_msg}")
+                
+                # Log more details for debugging
+                print(f"❌ Multi-angle detection failed: {error_msg}")
+                print(f"   - Number of images: {len(images)}")
+                print(f"   - Detail level: {detail_level}")
+                print(f"   - Category: {category}")
+                
                 return {
                     "product_type": "unknown",
                     "brand": "unknown",
                     "condition": "unknown",
                     "overall_confidence": 0.0,
-                    "error": str(e),
+                    "error": error_msg,
+                    "error_details": {
+                        "num_images": len(images),
+                        "detail_level": detail_level,
+                        "category": category
+                    },
                     "processing_time_ms": timer.elapsed_ms,
                     "category": category
                 }
@@ -456,16 +506,18 @@ Use ALL {num_images} images together for the MOST ACCURATE assessment possible."
         
         base_instructions = """
 
-🔴 STEP 1: READ ALL TEXT FROM ALL IMAGES
+🔴 STEP 1: READ ALL TEXT FROM ALL IMAGES (INCLUDING BARCODES!)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Go through EACH image and read EVERY piece of text:
 • Brand names (any angle where it's visible)
 • Model numbers or product codes
+• **Barcode/UPC/EAN numbers (12-13 digits) - VERY IMPORTANT!**
 • Size labels
 • Material descriptions
 • Any other text
 
 Compare text across images to confirm brand!
+Look for barcodes on packaging, labels, or stickers.
 
 🔴 STEP 2: IDENTIFY SPECIFIC PRODUCT & BRAND
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -520,8 +572,11 @@ RESPOND IN THIS JSON FORMAT (FILL EVERY FIELD):
     
     "visible_text_found": [
         "ALL text from ALL images",
+        "**Include any barcode/UPC/EAN numbers seen**",
         "Note which image each text came from if helpful"
     ],
+    
+    "barcode_sku_found": "If any image shows a barcode number (12-13 digits), write it here. Otherwise: null",
     
     "product_specific_wear_analysis": {{
         "product_identified": "specific product name",
@@ -606,7 +661,8 @@ RESPOND IN JSON:
     
     "condition": "Excellent/Good/Fair/Poor",
     
-    "visible_text_found": ["text from all images"],
+    "visible_text_found": ["text from all images including barcode numbers"],
+    "barcode_sku_found": "barcode/UPC/EAN if visible in any image, otherwise: null",
     
     "product_specific_wear_analysis": {{
         "product_identified": "specific product",

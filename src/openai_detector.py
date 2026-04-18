@@ -129,6 +129,18 @@ class OpenAIVisionDetector:
 
 {categories_str}
 
+Also determine if this item is suitable for resale on marketplace platforms.
+
+NOT SUITABLE items include:
+• Trash, garbage, or waste
+• Perishable food or beverages
+• Opened/consumed food items
+• Hazardous materials
+• Bodily fluids or medical waste
+• Extremely damaged/broken items beyond repair
+• Items with no resale value
+• Contraband or illegal items
+
 Respond in JSON format:
 {{
     "category": "the most appropriate category",
@@ -137,7 +149,9 @@ Respond in JSON format:
         {{"category": "second best match", "confidence": 0.03}},
         {{"category": "third best match", "confidence": 0.02}}
     ],
-    "reasoning": "brief explanation of why you chose this category"
+    "reasoning": "brief explanation of why you chose this category",
+    "marketplace_suitable": true or false,
+    "suitability_reasoning": "why this is or isn't suitable for marketplace resale"
 }}
 
 Be precise and confident in your classification. The confidence should be a number between 0 and 1."""
@@ -199,7 +213,9 @@ Be precise and confident in your classification. The confidence should be a numb
                     "confidence": 0.0,
                     "alternatives": [],
                     "error": str(e),
-                    "processing_time_ms": timer.elapsed_ms
+                    "processing_time_ms": timer.elapsed_ms,
+                    "marketplace_suitable": True,  # Default to suitable on error
+                    "suitability_reasoning": "Unable to assess suitability due to API error"
                 }
 
 

@@ -45,8 +45,10 @@ python app.py
 ```
 
 Opens a web interface with:
-- **Flash/torch control** - Toggle camera flash on/off (NEW!)
-- **Universal category analysis** - Detailed analysis for ALL product types (NEW!)
+- **Marketplace suitability filtering** - Automatically rejects unsuitable items (trash, food, etc.)
+- **Flash/torch control** - Toggle camera flash on/off
+- **Universal category analysis** - Detailed analysis for ALL product types
+- **Barcode/SKU lookup** - Automatic product data retrieval from barcodes (NEW!)
 - **Multi-angle capture** - Take 2-4 photos from different angles for better accuracy
 - **Live webcam feed** with gallery view
 - **Image rotation controls** (0°, 90°, 180°, 270°) - rotates actual image, not just display
@@ -54,12 +56,17 @@ Opens a web interface with:
 - **Small feature detection** - finds scratches, text, model numbers, damage
 - **Instant results** with comprehensive analysis
 - **Cross-angle verification** - combines multiple views for better brand/wear detection
+- **Auto-saved JSON files** - Complete analysis data saved to `jsons/` folder
 
 See:
-- [`LATEST_FEATURES.md`](LATEST_FEATURES.md) - Flash control & universal analysis (NEW!)
+- [`BARCODE_IMPLEMENTATION.md`](BARCODE_IMPLEMENTATION.md) - SKU/barcode lookup (NEW!)
+- [`LATEST_FEATURES.md`](LATEST_FEATURES.md) - Flash control & universal analysis
+- [`DYNAMIC_PRODUCT_WEAR.md`](DYNAMIC_PRODUCT_WEAR.md) - Product-specific wear detection
+- [`JSON_OUTPUT_GUIDE.md`](JSON_OUTPUT_GUIDE.md) - Comprehensive JSON outputs
 - [`MULTI_IMAGE_GUIDE.md`](MULTI_IMAGE_GUIDE.md) - Multi-angle capture
 - [`WEBCAM_GUIDE.md`](WEBCAM_GUIDE.md) - Basic webcam usage
 - [`ENHANCED_FEATURES_GUIDE.md`](ENHANCED_FEATURES_GUIDE.md) - Rotation and detail analysis
+- [`MARKETPLACE_FILTERING.md`](MARKETPLACE_FILTERING.md) - Automatic filtering of unsuitable items
 
 ### Option 2: Command Line - CLIP (Free, runs locally)
 

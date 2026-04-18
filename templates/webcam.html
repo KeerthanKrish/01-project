@@ -295,6 +295,49 @@
             margin-top: 15px;
         }
 
+        .upload-zone {
+            border: 2px dashed #cbd5e1;
+            border-radius: 12px;
+            padding: 18px;
+            text-align: center;
+            background: #f8fafc;
+            color: #475569;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .upload-zone:hover,
+        .upload-zone.dragover {
+            border-color: #667eea;
+            background: #eef2ff;
+            color: #4338ca;
+        }
+
+        .upload-zone-title {
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .upload-zone-subtitle {
+            font-size: 0.9em;
+            color: #64748b;
+        }
+
+        .upload-btn {
+            margin-top: 12px;
+            background: white;
+            border: 1px solid #cbd5e1;
+            color: #334155;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .upload-btn:hover {
+            background: #f8fafc;
+        }
+
         .gallery {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
@@ -591,9 +634,16 @@
                             📸 Add Photo
                         </button>
                     </div>
+
+                    <div id="uploadZone" class="upload-zone">
+                        <div class="upload-zone-title">Drag and drop images here</div>
+                        <div class="upload-zone-subtitle">Or upload photos from your computer instead of using the webcam</div>
+                        <button id="uploadBtn" class="upload-btn" type="button">📁 Choose Images</button>
+                        <input id="fileInput" type="file" accept="image/*" multiple hidden>
+                    </div>
                     
                     <div id="gallery" class="gallery empty">
-                        No images captured yet
+                        No images added yet
                     </div>
                     
                     <div class="image-counter">
@@ -630,6 +680,9 @@
         const analyzeBtn = document.getElementById('analyzeBtn');
         const clearBtn = document.getElementById('clearBtn');
         const flashBtn = document.getElementById('flashBtn');
+        const uploadZone = document.getElementById('uploadZone');
+        const uploadBtn = document.getElementById('uploadBtn');
+        const fileInput = document.getElementById('fileInput');
         const gallery = document.getElementById('gallery');
         const imageCount = document.getElementById('imageCount');
         const resultsDiv = document.getElementById('results');
@@ -750,6 +803,40 @@
             return rotatedCanvas;
         }
 
+        function fileToDataUrl(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = () => reject(new Error(`Failed to read ${file.name}`));
+                reader.readAsDataURL(file);
+            });
+        }
+
+        async function addUploadedFiles(files) {
+            const imageFiles = Array.from(files).filter(file => file.type.startsWith('image/'));
+
+            if (imageFiles.length === 0) {
+                alert('Please choose one or more image files.');
+                return;
+            }
+
+            try {
+                const uploadedImages = await Promise.all(imageFiles.map(fileToDataUrl));
+                capturedImages.push(...uploadedImages);
+                updateGallery();
+                analyzeBtn.disabled = false;
+                uploadBtn.textContent = `✅ Added ${uploadedImages.length} image(s)!`;
+                setTimeout(() => {
+                    uploadBtn.textContent = '📁 Choose Images';
+                }, 800);
+            } catch (err) {
+                console.error('Error loading uploaded files:', err);
+                alert(err.message || 'Failed to load selected images.');
+            } finally {
+                fileInput.value = '';
+            }
+        }
+
         // Capture single image and add to gallery
         function captureImage() {
             const canvas = document.createElement('canvas');
@@ -775,7 +862,7 @@
             
             if (capturedImages.length === 0) {
                 gallery.className = 'gallery empty';
-                gallery.innerHTML = 'No images captured yet';
+                gallery.innerHTML = 'No images added yet';
                 analyzeBtn.disabled = true;
                 return;
             }
@@ -817,8 +904,8 @@
             resultsDiv.innerHTML = `
                 <div class="placeholder">
                     <div class="placeholder-icon">📦</div>
-                    <p>Capture multiple angles of your product</p>
-                    <p style="font-size: 0.9em; margin-top: 10px;">Tip: Take 2-4 photos from different angles for best results</p>
+                        <p>Capture or upload multiple angles of your product</p>
+                        <p style="font-size: 0.9em; margin-top: 10px;">Tip: Mix webcam shots and uploaded photos if that is easier</p>
                 </div>
             `;
         }
@@ -871,6 +958,30 @@
             }
         }
 
+        uploadBtn.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', (event) => {
+            if (event.target.files && event.target.files.length > 0) {
+                addUploadedFiles(event.target.files);
+            }
+        });
+
+        uploadZone.addEventListener('dragover', (event) => {
+            event.preventDefault();
+            uploadZone.classList.add('dragover');
+        });
+
+        uploadZone.addEventListener('dragleave', () => {
+            uploadZone.classList.remove('dragover');
+        });
+
+        uploadZone.addEventListener('drop', (event) => {
+            event.preventDefault();
+            uploadZone.classList.remove('dragover');
+            if (event.dataTransfer.files && event.dataTransfer.files.length > 0) {
+                addUploadedFiles(event.dataTransfer.files);
+            }
+        });
+
         // Display detection results
         function displayResults(data) {
             const tier1 = data.tier1;
@@ -878,10 +989,84 @@
             
             let html = '';
 
+            // Check if item is not suitable for marketplace
+            if (data.marketplace_suitable === false) {
+                html = `
+                    <div style="background: #fef2f2; border: 2px solid #ef4444; border-radius: 12px; padding: 25px; margin-bottom: 20px;">
+                        <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px;">
+                            <div style="font-size: 3em;">⛔</div>
+                            <div>
+                                <div style="font-size: 1.3em; font-weight: 700; color: #dc2626; margin-bottom: 5px;">
+                                    Not Suitable for Marketplace Resale
+                                </div>
+                                <div style="font-size: 0.95em; color: #991b1b;">
+                                    This item is not appropriate for marketplace listings
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div style="background: white; padding: 15px; border-radius: 8px; margin-top: 15px;">
+                            <div style="font-weight: 600; color: #7f1d1d; margin-bottom: 8px;">Reason:</div>
+                            <div style="color: #991b1b; font-size: 0.95em;">
+                                ${data.suitability_reasoning || 'Item determined to be unsuitable for resale'}
+                            </div>
+                        </div>
+                        
+                        <div style="background: #fff7ed; padding: 12px; border-radius: 8px; margin-top: 15px; border-left: 3px solid #f59e0b;">
+                            <div style="font-size: 0.9em; color: #78350f;">
+                                <strong>Note:</strong> Detailed condition analysis was skipped for this item.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="result-card">
+                        <div class="result-header">
+                            <span class="tier-badge">TIER 1</span>
+                            Category Detection
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">Detected As</span>
+                            <span class="result-value">${tier1.category || 'Unknown'}</span>
+                        </div>
+                    </div>
+                `;
+                
+                if (data.saved_paths && data.saved_paths.length > 0) {
+                    html += `
+                        <div style="background: white; padding: 15px; border-radius: 8px; margin-top: 10px;">
+                            <div style="font-weight: 600; color: #1f2937; margin-bottom: 8px;">💾 Images Saved:</div>
+                            <div style="font-size: 0.85em; color: #6b7280;">
+                                ${data.saved_paths.map((path, i) => `<div style="margin: 3px 0;">Image ${i+1}: ${path.split('\\').pop()}</div>`).join('')}
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                resultsDiv.innerHTML = html;
+                return;
+            }
+
             if (data.images_analyzed > 1) {
                 html += `
                     <div style="background: #dbeafe; padding: 12px; border-radius: 8px; margin-bottom: 15px; text-align: center; color: #1e40af; font-weight: 500;">
                         📐 Multi-Angle Analysis: ${data.images_analyzed} images analyzed together
+                    </div>
+                `;
+            }
+
+            // Barcode lookup indicator
+            if (data.barcode_lookup && data.barcode_lookup.found) {
+                html += `
+                    <div style="background: #dcfce7; padding: 12px; border-radius: 8px; margin-bottom: 15px; border-left: 3px solid #10b981;">
+                        <div style="font-weight: 600; color: #047857; margin-bottom: 5px;">📊 Barcode Information Retrieved</div>
+                        <div style="color: #065f46; font-size: 0.9em;">
+                            ${data.barcode_lookup.brand ? `Brand: ${data.barcode_lookup.brand}<br>` : ''}
+                            ${data.barcode_lookup.title ? `Product: ${data.barcode_lookup.title}<br>` : ''}
+                            <span style="font-size: 0.85em; opacity: 0.8;">Barcode: ${data.barcode_lookup.barcode}</span>
+                        </div>
+                        <div style="font-size: 0.8em; margin-top: 5px; font-style: italic; color: #059669;">
+                            Additional product details saved in JSON file
+                        </div>
                     </div>
                 `;
             }

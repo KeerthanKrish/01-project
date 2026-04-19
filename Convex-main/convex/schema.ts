@@ -19,6 +19,7 @@ export default defineSchema({
   listings: defineTable({
     description: v.string(),
     price: v.number(),
+    imageUrls: v.optional(v.array(v.string())),
     status: v.union(v.literal("available"), v.literal("sold")),
     /** App user (seller) this listing belongs to. */
     userId: v.id("users"),

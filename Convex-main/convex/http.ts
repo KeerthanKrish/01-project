@@ -88,6 +88,11 @@ http.route({
       const analysis = body.analysisJson ?? body.analysis ?? {};
       const tier2 = analysis.tier2 ?? {};
       const listing = analysis.listing ?? {};
+      const imageUrls =
+        body.imageUrls ??
+        listing.imageUrls ??
+        analysis.imageUrls ??
+        [];
 
       const sellerPrice = Number(body.sellerPrice ?? body.price ?? 0);
       const title = String(listing.title ?? "");
@@ -101,6 +106,9 @@ http.route({
         {
           description: description || title || "Listing",
           price: sellerPrice,
+          imageUrls: Array.isArray(imageUrls)
+            ? imageUrls.map((url) => String(url))
+            : [],
         },
       );
 

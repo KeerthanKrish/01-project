@@ -44,8 +44,8 @@ async def find_products(query: str) -> str:
         return "Error: Search query must be between 1 and 200 characters"
     
     try:
-        # Call Convex marketplace.searchProducts function
-        results = convex_client.query("marketplace:searchProducts", {"query": query})
+        # Call Convex marketplace:searchProducts function
+        results = convex_client.query("marketplace:searchProducts", {"searchText": query})
         
         if not results:
             return f"No products found matching '{query}'"
@@ -55,15 +55,17 @@ async def find_products(query: str) -> str:
         for product in results:
             product_info = f"""
 Product ID: {product.get('_id', 'N/A')}
-Name: {product.get('name', 'N/A')}
 Description: {product.get('description', 'N/A')}
 Price: ${product.get('price', 'N/A')}
+Status: {product.get('status', 'N/A')}
 """
             formatted_results.append(product_info.strip())
         
         return "\n\n---\n\n".join(formatted_results)
     
     except Exception as e:
+        # Log full error to stderr for debugging
+        print(f"Error in find_products: {type(e).__name__}: {str(e)}", file=sys.stderr)
         return f"Error searching products: {str(e)}"
 
 
@@ -79,10 +81,10 @@ async def get_payment_link(id: str) -> str:
         return "Error: Product ID cannot be empty"
     
     try:
-        # Call Convex marketplace.generatePayment function
+        # Call Convex marketplace:generatePayment function
         payment_data = convex_client.mutation(
             "marketplace:generatePayment",
-            {"id": id}
+            {"productId": id}
         )
         
         if not payment_data:
@@ -92,11 +94,8 @@ async def get_payment_link(id: str) -> str:
         payment_info = f"""
 Payment Link Generated Successfully
 
-Product ID: {payment_data.get('productId', id)}
+Product ID: {id}
 Payment URL: {payment_data.get('paymentUrl', 'N/A')}
-Amount: ${payment_data.get('amount', 'N/A')}
-Currency: {payment_data.get('currency', 'USD')}
-Expires: {payment_data.get('expiresAt', 'N/A')}
 
 Instructions: Share this payment link with the customer to complete the purchase.
 """
@@ -104,6 +103,8 @@ Instructions: Share this payment link with the customer to complete the purchase
         return payment_info.strip()
     
     except Exception as e:
+        # Log full error to stderr for debugging
+        print(f"Error in get_payment_link: {type(e).__name__}: {str(e)}", file=sys.stderr)
         return f"Error generating payment link: {str(e)}"
 
 
@@ -146,11 +147,11 @@ async def finalize_purchase(
         return "Error: Invalid email format"
     
     try:
-        # Call Convex marketplace.confirmSale function
+        # Call Convex marketplace:confirmSale function
         confirmation = convex_client.mutation(
             "marketplace:confirmSale",
             {
-                "id": id,
+                "productId": id,
                 "name": name,
                 "address": address,
                 "email": email
@@ -164,20 +165,21 @@ async def finalize_purchase(
         confirmation_info = f"""
 Purchase Confirmed Successfully! 🎉
 
-Order ID: {confirmation.get('orderId', 'N/A')}
-Product ID: {confirmation.get('productId', id)}
+Buyer ID: {confirmation.get('buyerId', 'N/A')}
+Listing ID: {confirmation.get('listingId', id)}
 Customer: {name}
 Email: {email}
 Shipping Address: {address}
-Status: {confirmation.get('status', 'Confirmed')}
-Estimated Delivery: {confirmation.get('estimatedDelivery', 'N/A')}
+Status: Confirmed
 
-A confirmation email has been sent to {email}.
+The listing has been marked as sold.
 """
         
         return confirmation_info.strip()
     
     except Exception as e:
+        # Log full error to stderr for debugging
+        print(f"Error in finalize_purchase: {type(e).__name__}: {str(e)}", file=sys.stderr)
         return f"Error finalizing purchase: {str(e)}"
 
 

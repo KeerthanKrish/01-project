@@ -34,6 +34,9 @@ import io
 from datetime import datetime
 from pathlib import Path
 from openai import OpenAI
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 # ============================================================================
@@ -123,11 +126,9 @@ class MarketplaceDetector:
         self.model = model
         self.categories = categories if categories else self.DEFAULT_CATEGORIES
         self.output_folder = Path(output_folder)
-        self.output_folder.mkdir(exist_ok=True)
         
-        # Create search_jsons folder for search optimization payloads
+        # Folder for optional search payload persistence
         self.search_folder = Path("search_jsons")
-        self.search_folder.mkdir(exist_ok=True)
         
         print(f"✅ Marketplace Detector initialized with {self.model}")
     
@@ -237,7 +238,7 @@ class MarketplaceDetector:
             'marketplace_listing': self._generate_marketplace_listing(tier1_result, tier2_result)
         }
         
-        # Save comprehensive JSON
+        # Generate search optimization payload (always for suitable items)
         if save_json:
             json_path, timestamp = self._save_comprehensive_json(
                 tier1_result, tier2_result,
@@ -246,14 +247,17 @@ class MarketplaceDetector:
             )
             result['json_saved_path'] = str(json_path)
             print(f"📄 Analysis saved: {json_path}")
-            
-            # Generate search optimization payload (automatically for suitable items)
-            search_payload = self._generate_search_payload(
-                tier1_result, tier2_result, timestamp
-            )
+        else:
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        
+        search_payload = self._generate_search_payload(
+            tier1_result, tier2_result, timestamp
+        )
+        result['search_payload'] = search_payload
+        
+        if save_json:
             search_json_path = self._save_search_payload(search_payload, timestamp)
             result['search_json_path'] = str(search_json_path)
-            result['search_payload'] = search_payload
         
         return result
     
@@ -788,6 +792,7 @@ Input JSON:
         Returns:
             Path to saved JSON file
         """
+        self.search_folder.mkdir(parents=True, exist_ok=True)
         search_json_path = self.search_folder / f"search_{timestamp}.json"
         
         with open(search_json_path, 'w', encoding='utf-8') as f:
@@ -1079,6 +1084,7 @@ CRITICAL: Identify SPECIFIC product, think what wears on it, check those points 
     ) -> tuple[Path, str]:
         """Save comprehensive JSON with all analysis details. Returns (path, timestamp)."""
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        self.output_folder.mkdir(parents=True, exist_ok=True)
         json_path = self.output_folder / f"analysis_{timestamp}.json"
         
         output = {
@@ -1108,7 +1114,7 @@ def analyze_product(
     images: Union[str, List[str]],
     api_key: Optional[str] = None,
     detail_level: str = "detailed",
-    save_json: bool = True
+    save_json: bool = False
 ) -> Dict[str, Any]:
     """
     Convenience function for quick product analysis.
@@ -1152,7 +1158,7 @@ if __name__ == "__main__":
     image_paths = sys.argv[1:]
     
     print(f"\nAnalyzing {len(image_paths)} image(s)...")
-    result = analyze_product(image_paths, detail_level="detailed")
+    result = analyze_product(image_paths, detail_level="detailed", save_json=False)
     
     print("\n" + "="*70)
     print("RESULTS")

@@ -60,10 +60,7 @@ print(result['marketplace_listing']['title'])
 ### Core Workflow
 
 ```
-Images → Marketplace Filter → Category → Detailed Analysis → Barcode Lookup → JSON Outputs
-                                                                                    ↓
-                                                          Comprehensive Analysis (jsons/)
-                                                          Search Optimization (search_jsons/)
+Images → Marketplace Filter → Category → Detailed Analysis → Barcode Lookup → JSON Output
 ```
 
 1. **Marketplace Suitability Check** - Filters out unsuitable items (trash, food, hazardous materials)
@@ -75,9 +72,7 @@ Images → Marketplace Filter → Category → Detailed Analysis → Barcode Loo
    - **Functionality Assessment** - Working condition and concerns
    - **Marketplace Grading** - A/B/C/D cosmetic grade and selling points
 4. **Barcode Lookup** - Fetches additional product data from UPC/EAN if detected
-5. **JSON Outputs** - Saves TWO files automatically:
-   - **Comprehensive Analysis** (`jsons/analysis_TIMESTAMP.json`) - Full detailed report
-   - **Search Payload** (`search_jsons/search_TIMESTAMP.json`) - Optimized for similarity search APIs
+5. **JSON Output** - Returned directly in the API response
 
 ### Product-Specific Wear Detection
 
@@ -103,7 +98,7 @@ This provides **much more thorough** condition assessment than generic damage de
 
 ### Search Optimization Payloads
 
-**Automatically generated for every analysis** - the system creates a second JSON file optimized for similarity-search APIs.
+**Automatically generated for every analysis** - the system returns a second JSON object optimized for similarity-search APIs.
 
 **What it does:**
 - Extracts only high-signal attributes (brand, product type, material, color, features)
@@ -256,14 +251,12 @@ When analyzing multiple images:
 
 ## 📊 Output Format
 
-### Two JSON Files Generated Per Analysis
+### Two JSON Objects Returned Per Analysis
 
-1. **Comprehensive Analysis** (`jsons/analysis_TIMESTAMP.json`) - Full detailed report
-2. **Search Payload** (`search_jsons/search_TIMESTAMP.json`) - Optimized for search APIs
+1. **Comprehensive Analysis** - Full detailed report
+2. **Search Payload** - Optimized for search APIs
 
 ### 1. Comprehensive Analysis JSON
-
-Saved to `jsons/analysis_TIMESTAMP.json`:
 
 ```json
 {
@@ -378,8 +371,6 @@ Saved to `jsons/analysis_TIMESTAMP.json`:
 
 ### 2. Search Optimization Payload JSON
 
-Saved to `search_jsons/search_TIMESTAMP.json`:
-
 ```json
 {
   "primary_query": "Sony WH-1000XM4 wireless noise canceling headphones black",
@@ -479,15 +470,6 @@ detector = MarketplaceDetector(
 )
 ```
 
-#### Custom Output Folder
-```python
-detector = MarketplaceDetector(
-    output_folder="my_analysis_results"
-)
-```
-
----
-
 ## 📂 Project Structure
 
 ```
@@ -506,13 +488,13 @@ detector = MarketplaceDetector(
 │   ├── .gitkeep
 │   └── capture_*.jpg
 │
-├── jsons/              # Comprehensive analysis outputs (auto-created, gitignored)
+├── jsons/              # Optional analysis outputs (only if save_json=True)
 │   ├── .gitkeep
 │   └── analysis_*.json
 │
-└── search_jsons/       # Search optimization payloads (auto-created, gitignored)
-    ├── .gitkeep
-    └── search_*.json
+└── search_jsons/       # Optional search payloads (only if save_json=True)
+  ├── .gitkeep
+  └── search_*.json
 ```
 
 ---
@@ -567,8 +549,8 @@ print(result['tier2']['brand'])
 print(result['tier2']['product_specific_wear_analysis'])
 print(result['marketplace_listing']['title'])
 
-# JSON already saved to jsons/ folder
-print(f"Saved to: {result['json_saved_path']}")
+# Results are returned in-memory (no files written)
+print(f"Search query: {result['search_payload']['primary_query']}")
 ```
 
 ### Batch Processing

@@ -17,6 +17,9 @@ import io
 from datetime import datetime
 from pathlib import Path
 from detector import MarketplaceDetector
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app = Flask(__name__)
 
@@ -81,7 +84,7 @@ def detect():
         result = detector.analyze_images(
             images=processed_images,
             detail_level=detail_level,
-            save_json=True
+            save_json=False
         )
         
         # Format response for web UI
@@ -96,7 +99,7 @@ def detect():
             'tier2': result['tier2'],
             'backend': 'OpenAI Vision',
             'detail_level': detail_level,
-            'json_saved_path': result.get('json_saved_path', '')
+            'search_payload': result.get('search_payload')
         }
         
         # Add barcode info if found

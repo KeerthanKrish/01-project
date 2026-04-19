@@ -39,9 +39,8 @@ def analyze_single_image(image_path: str):
             print(f"Type: {result['product']['type']}")
             print(f"Condition: {result['product']['condition']}")
         
-        print(f"Files saved:")
-        print(f"  - Analysis: {result['files']['comprehensive_analysis']}")
-        print(f"  - Search: {result['files']['search_payload']}")
+        if result.get('search'):
+            print(f"Search query: {result['search'].get('primary_query', '')}")
     else:
         print(f"❌ Error: {response.status_code}")
         print(response.json())
@@ -78,37 +77,6 @@ def analyze_multiple_images(image_paths: list):
         print(response.json())
 
 
-def get_saved_analysis(analysis_id: str):
-    """Retrieve a saved analysis by ID."""
-    print(f"\n4️⃣ Retrieving analysis: {analysis_id}")
-    
-    response = requests.get(f"{API_URL}/api/analysis/{analysis_id}")
-    
-    if response.status_code == 200:
-        result = response.json()
-        print(f"✅ Found!")
-        print(f"Timestamp: {result['analysis_metadata']['timestamp']}")
-        print(f"Category: {result['tier1_category_detection']['category']}")
-    else:
-        print(f"❌ Not found: {response.status_code}")
-
-
-def list_recent_analyses():
-    """List recent analyses."""
-    print(f"\n5️⃣ Listing recent analyses...")
-    
-    response = requests.get(f"{API_URL}/api/analyses?limit=5")
-    
-    if response.status_code == 200:
-        result = response.json()
-        print(f"✅ Found {result['count']} analyses:")
-        
-        for analysis in result['analyses']:
-            print(f"  - {analysis['analysis_id']}: {analysis['category']} ({analysis['images_analyzed']} images)")
-    else:
-        print(f"❌ Error: {response.status_code}")
-
-
 # Example using curl (command-line):
 CURL_EXAMPLES = """
 ================================================================================
@@ -128,16 +96,7 @@ CURL_EXAMPLES = """
         -F "images=@back.jpg" \\
         -F "images=@damage.jpg"
 
-4. Get Analysis by ID:
-    curl http://localhost:8001/api/analysis/20260418_143000
-
-5. Get Search Payload by ID:
-    curl http://localhost:8001/api/search/20260418_143000
-
-6. List Recent Analyses:
-    curl http://localhost:8001/api/analyses?limit=10
-
-7. View API Documentation:
+4. View API Documentation:
     Open in browser: http://localhost:8001/docs
    
 ================================================================================
@@ -163,11 +122,5 @@ if __name__ == "__main__":
     
     # Example: analyze multiple images
     # analyze_multiple_images(["front.jpg", "back.jpg", "damage.jpg"])
-    
-    # Example: get saved analysis
-    # get_saved_analysis("20260418_143000")
-    
-    # Example: list recent
-    # list_recent_analyses()
     
     print("\n💡 To run Python examples, uncomment the function calls at the bottom of this file.")

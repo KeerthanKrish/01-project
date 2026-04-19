@@ -3,7 +3,6 @@ from fastapi.responses import JSONResponse
 import cv2
 import base64
 import os
-import tempfile
 import numpy as np
 from openai import OpenAI
 from pydantic import BaseModel
@@ -19,12 +18,11 @@ class DetectionResult(BaseModel):
     has_exactly_one_object: bool
     error: str = None
 
-def encode_image_to_base64(image_path):
-    """Read and encode image to base64 string."""
-    with open(image_path, "rb") as image_file:
-        return base64.b64encode(image_file.read()).decode('utf-8')
+def encode_image_bytes_to_base64(image_bytes: bytes) -> str:
+    """Encode image bytes to base64 string."""
+    return base64.b64encode(image_bytes).decode('utf-8')
 
-def count_objects_with_gpt(image_path, api_key):
+def count_objects_with_gpt_base64(base64_image: str, api_key: str):
     """
     Use GPT-4o-mini Vision to count objects in an image.
     
@@ -35,15 +33,6 @@ def count_objects_with_gpt(image_path, api_key):
     Returns:
         int: Number of objects detected, or None if detection fails
     """
-    if not os.path.exists(image_path):
-        return None
-    
-    img = cv2.imread(image_path)
-    if img is None:
-        return None
-    
-    base64_image = encode_image_to_base64(image_path)
-    
     client = OpenAI(api_key=api_key)
     
     try:
@@ -127,37 +116,29 @@ async def detect_objects(file: UploadFile = File(...)):
     try:
         contents = await file.read()
         
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".jpg") as temp_file:
-            temp_file.write(contents)
-            temp_path = temp_file.name
-        
-        try:
-            img = cv2.imdecode(np.frombuffer(contents, np.uint8), cv2.IMREAD_COLOR)
-            if img is None:
-                raise HTTPException(
-                    status_code=400,
-                    detail="Invalid image file"
-                )
-            
-            object_count = count_objects_with_gpt(temp_path, api_key)
-            
-            if object_count is None:
-                return DetectionResult(
-                    image_name=file.filename,
-                    object_count=0,
-                    has_exactly_one_object=False,
-                    error="Failed to detect objects"
-                )
-            
-            return DetectionResult(
-                image_name=file.filename,
-                object_count=object_count,
-                has_exactly_one_object=object_count == 1
+        img = cv2.imdecode(np.frombuffer(contents, np.uint8), cv2.IMREAD_COLOR)
+        if img is None:
+            raise HTTPException(
+                status_code=400,
+                detail="Invalid image file"
             )
         
-        finally:
-            if os.path.exists(temp_path):
-                os.unlink(temp_path)
+        base64_image = encode_image_bytes_to_base64(contents)
+        object_count = count_objects_with_gpt_base64(base64_image, api_key)
+        
+        if object_count is None:
+            return DetectionResult(
+                image_name=file.filename,
+                object_count=0,
+                has_exactly_one_object=False,
+                error="Failed to detect objects"
+            )
+        
+        return DetectionResult(
+            image_name=file.filename,
+            object_count=object_count,
+            has_exactly_one_object=object_count == 1
+        )
     
     except HTTPException:
         raise

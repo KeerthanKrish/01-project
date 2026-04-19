@@ -8,8 +8,6 @@ Alternative to the Flask web interface (app.py).
 Endpoints:
 - POST /api/analyze - Analyze uploaded images
 - GET /api/health - Health check
-- GET /api/analysis/{analysis_id} - Get saved analysis by ID
-- GET /api/search/{analysis_id} - Get search payload by ID
 
 Usage:
     uvicorn api:app --reload --host 0.0.0.0 --port 8001
@@ -22,13 +20,14 @@ from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from typing import List, Optional
-from pathlib import Path
 from PIL import Image
 import io
-import json
 from datetime import datetime
+from dotenv import load_dotenv
 
 from detector import MarketplaceDetector
+
+load_dotenv()
 
 # Initialize FastAPI app
 app = FastAPI(
@@ -53,10 +52,6 @@ print("Initializing detector...")
 detector = MarketplaceDetector()
 print("Detector ready!")
 
-# Folders for saved results
-JSONS_FOLDER = Path("jsons")
-SEARCH_JSONS_FOLDER = Path("search_jsons")
-
 
 @app.get("/")
 async def root():
@@ -68,8 +63,6 @@ async def root():
         "endpoints": {
             "analyze": "POST /api/analyze",
             "health": "GET /api/health",
-            "get_analysis": "GET /api/analysis/{analysis_id}",
-            "get_search": "GET /api/search/{analysis_id}",
             "docs": "GET /docs"
         }
     }
@@ -139,7 +132,7 @@ async def analyze_images(
         result = detector.analyze_images(
             images=pil_images,
             detail_level="detailed",
-            save_json=True
+            save_json=False
         )
         
         # Format response
@@ -148,6 +141,10 @@ async def analyze_images(
             "marketplace_suitable": result['marketplace_suitable'],
             "images_analyzed": result['images_analyzed'],
             "analysis_timestamp": datetime.now().isoformat(),
+            "detail_level": "detailed",
+            "suitability_reasoning": result.get('suitability_reasoning', ''),
+            "tier1": result.get('tier1'),
+            "tier2": result.get('tier2'),
             
             # Category detection (Tier 1)
             "category": {
@@ -161,18 +158,13 @@ async def analyze_images(
             
             # Barcode lookup
             "barcode": None,
+            "barcode_lookup": result.get('barcode_lookup'),
             
             # Marketplace listing data
             "listing": result.get('marketplace_listing'),
             
             # Search optimization payload
-            "search": result.get('search_payload'),
-            
-            # Saved file paths
-            "files": {
-                "comprehensive_analysis": result.get('json_saved_path'),
-                "search_payload": result.get('search_json_path')
-            }
+            "search": result.get('search_payload')
         }
         
         # Add product details if suitable
@@ -213,136 +205,6 @@ async def analyze_images(
         raise HTTPException(status_code=500, detail=f"Analysis failed: {str(e)}")
 
 
-@app.get("/api/analysis/{analysis_id}")
-async def get_analysis(analysis_id: str):
-    """
-    Retrieve a saved comprehensive analysis by ID.
-    
-    Args:
-        analysis_id: Timestamp ID of the analysis (e.g., "20260418_143000")
-        
-    Returns:
-        Complete analysis JSON
-        
-    Example:
-        curl "http://localhost:8001/api/analysis/20260418_143000"
-    """
-    try:
-        json_path = JSONS_FOLDER / f"analysis_{analysis_id}.json"
-        
-        if not json_path.exists():
-            raise HTTPException(
-                status_code=404,
-                detail=f"Analysis '{analysis_id}' not found"
-            )
-        
-        with open(json_path, 'r', encoding='utf-8') as f:
-            analysis_data = json.load(f)
-        
-        return JSONResponse(content=analysis_data)
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail=f"Error loading analysis: {str(e)}"
-        )
-
-
-@app.get("/api/search/{analysis_id}")
-async def get_search_payload(analysis_id: str):
-    """
-    Retrieve a saved search optimization payload by ID.
-    
-    Args:
-        analysis_id: Timestamp ID of the analysis (e.g., "20260418_143000")
-        
-    Returns:
-        Search optimization payload JSON
-        
-    Example:
-        curl "http://localhost:8001/api/search/20260418_143000"
-    """
-    try:
-        json_path = SEARCH_JSONS_FOLDER / f"search_{analysis_id}.json"
-        
-        if not json_path.exists():
-            raise HTTPException(
-                status_code=404,
-                detail=f"Search payload '{analysis_id}' not found"
-            )
-        
-        with open(json_path, 'r', encoding='utf-8') as f:
-            search_data = json.load(f)
-        
-        return JSONResponse(content=search_data)
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail=f"Error loading search payload: {str(e)}"
-        )
-
-
-@app.get("/api/analyses")
-async def list_analyses(limit: int = 20):
-    """
-    List recent analyses.
-    
-    Args:
-        limit: Maximum number of results to return (default: 20)
-        
-    Returns:
-        List of analysis IDs with metadata
-        
-    Example:
-        curl "http://localhost:8001/api/analyses?limit=10"
-    """
-    try:
-        # Get all analysis files
-        analysis_files = sorted(
-            JSONS_FOLDER.glob("analysis_*.json"),
-            key=lambda p: p.stat().st_mtime,
-            reverse=True
-        )[:limit]
-        
-        analyses = []
-        for file_path in analysis_files:
-            # Extract timestamp from filename
-            analysis_id = file_path.stem.replace("analysis_", "")
-            
-            # Load basic metadata
-            try:
-                with open(file_path, 'r', encoding='utf-8') as f:
-                    data = json.load(f)
-                
-                analyses.append({
-                    "analysis_id": analysis_id,
-                    "timestamp": data.get("analysis_metadata", {}).get("timestamp"),
-                    "category": data.get("tier1_category_detection", {}).get("category"),
-                    "marketplace_suitable": data.get("tier1_category_detection", {}).get("marketplace_suitable"),
-                    "images_analyzed": data.get("analysis_metadata", {}).get("images_analyzed", 1)
-                })
-            except Exception as e:
-                print(f"⚠️ Error loading {file_path.name}: {e}")
-                continue
-        
-        return {
-            "count": len(analyses),
-            "limit": limit,
-            "analyses": analyses
-        }
-        
-    except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail=f"Error listing analyses: {str(e)}"
-        )
-
-
 if __name__ == "__main__":
     import uvicorn
     
@@ -356,9 +218,7 @@ if __name__ == "__main__":
     print("\nEndpoints:")
     print("   POST /api/analyze - Analyze images")
     print("   GET  /api/health - Health check")
-    print("   GET  /api/analysis/{id} - Get analysis by ID")
-    print("   GET  /api/search/{id} - Get search payload by ID")
-    print("   GET  /api/analyses - List recent analyses")
+    print("   GET  /api/health - Health check")
     print("\nPress Ctrl+C to stop\n")
     print("="*70 + "\n")
     

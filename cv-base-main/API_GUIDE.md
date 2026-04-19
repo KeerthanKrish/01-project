@@ -59,10 +59,6 @@ curl -X POST http://localhost:8001/api/analyze \
   "search": {
     "primary_query": "Sony WH-1000XM4 wireless headphones",
     "keywords": ["Sony", "WH-1000XM4", "wireless", "headphones"]
-  },
-  "files": {
-    "comprehensive_analysis": "jsons/analysis_20260418_143000.json",
-    "search_payload": "search_jsons/search_20260418_143000.json"
   }
 }
 ```
@@ -88,52 +84,6 @@ curl http://localhost:8001/api/health
 
 ---
 
-### GET `/api/analysis/{analysis_id}`
-**Retrieve saved analysis**
-
-```bash
-curl http://localhost:8001/api/analysis/20260418_143000
-```
-
-**Response:** Full comprehensive analysis JSON
-
----
-
-### GET `/api/search/{analysis_id}`
-**Retrieve search payload**
-
-```bash
-curl http://localhost:8001/api/search/20260418_143000
-```
-
-**Response:** Search optimization payload JSON
-
----
-
-### GET `/api/analyses?limit=20`
-**List recent analyses**
-
-```bash
-curl http://localhost:8001/api/analyses?limit=10
-```
-
-**Response:**
-```json
-{
-  "count": 10,
-  "limit": 10,
-  "analyses": [
-    {
-      "analysis_id": "20260418_143000",
-      "timestamp": "2026-04-18T14:30:00",
-      "category": "electronics",
-      "marketplace_suitable": true,
-      "images_analyzed": 3
-    }
-  ]
-}
-```
-
 ## Python Client Example
 
 ```python
@@ -158,7 +108,7 @@ print(f"Condition: {result['product']['condition']}")
 - ✅ **Multi-image upload** - Analyze multiple angles
 - ✅ **Detailed analysis** - Always uses most thorough mode
 - ✅ **JSON responses** - Easy to integrate
-- ✅ **Auto-save** - Saves comprehensive + search JSONs
+- ✅ **No disk persistence** - Responses are returned directly
 - ✅ **Interactive docs** - Built-in Swagger UI
 - ✅ **CORS enabled** - Can be called from web browsers
 - ✅ **Error handling** - Proper HTTP status codes

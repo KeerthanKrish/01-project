@@ -1,0 +1,251 @@
+{
+  "analysis_metadata": {
+    "timestamp": "2026-04-18T15:09:29.609469",
+    "analysis_id": "20260418_150929",
+    "backend": "OpenAI Vision",
+    "detail_level": "detailed",
+    "rotation_applied": 0,
+    "images_analyzed": 7,
+    "saved_image_paths": [
+      "images\\capture_20260418_150916_1of7_r0.jpg",
+      "images\\capture_20260418_150916_2of7_r0.jpg",
+      "images\\capture_20260418_150916_3of7_r0.jpg",
+      "images\\capture_20260418_150916_4of7_r0.jpg",
+      "images\\capture_20260418_150916_5of7_r0.jpg",
+      "images\\capture_20260418_150916_6of7_r0.jpg",
+      "images\\capture_20260418_150916_7of7_r0.jpg"
+    ]
+  },
+  "tier1_category_detection": {
+    "category": "clothing and accessories",
+    "confidence": 0.95,
+    "reasoning": "The item in the image is a wallet, which is typically classified under clothing and accessories as it is a personal item used to carry money and cards.",
+    "all_predictions": [],
+    "processing_time_ms": null
+  },
+  "tier2_detailed_analysis": {
+    "images_analyzed": 7,
+    "angle_coverage": "Top, bottom, side, open, and closed views of the wallet.",
+    "brand": "VULKIT",
+    "brand_confidence": 0.95,
+    "brand_source": "Images 1, 2, and 6 showed the brand clearly on the wallet.",
+    "stickers_present": [],
+    "product_type": "Leather card holder wallet with RFID protection",
+    "product_type_confidence": 0.92,
+    "material": "Leather exterior with metal interior",
+    "color": "Black",
+    "size_or_dimensions": "Standard wallet size, approximately 4 x 3 inches",
+    "condition": "Good",
+    "condition_confidence": 0.9,
+    "visible_text_found": [
+      "VULKIT (Images 1, 2, 6)",
+      "Text on paper inside wallet (Image 4, 5, 7)"
+    ],
+    "product_specific_wear_analysis": {
+      "product_identified": "VULKIT Leather Card Holder Wallet",
+      "typical_wear_points_for_this_product": [
+        "Leather exterior can show scratches or scuffs",
+        "Metal interior can show dents or discoloration",
+        "Card slots can become loose over time"
+      ],
+      "inspection_results_by_angle": [
+        {
+          "wear_point": "leather exterior",
+          "visible_in_images": [
+            1,
+            2,
+            5
+          ],
+          "status": "good",
+          "details": "Minor scuffs visible, no major scratches",
+          "severity": "minor",
+          "affects_function": false
+        },
+        {
+          "wear_point": "metal interior",
+          "visible_in_images": [
+            3,
+            4,
+            7
+          ],
+          "status": "good",
+          "details": "Slight discoloration, no dents",
+          "severity": "minor",
+          "affects_function": false
+        }
+      ],
+      "multi_angle_benefits": "Multiple angles confirmed minor scuffs on leather and slight discoloration on metal.",
+      "summary": "Overall, the wallet is in good condition with minor cosmetic wear."
+    },
+    "general_physical_damage_by_angle": {
+      "image_1": [
+        "Minor scuffs on leather"
+      ],
+      "image_2": [
+        "Minor scuffs on leather"
+      ],
+      "image_3": [
+        "Slight discoloration on metal interior"
+      ],
+      "combined_summary": [
+        "Minor scuffs on leather exterior, slight discoloration on metal interior, no major damage."
+      ]
+    },
+    "overall_wear_assessment": "The wallet is in good condition with minor cosmetic wear, typical for its use.",
+    "functionality_assessment": {
+      "appears_functional": true,
+      "confidence": 0.85,
+      "reasoning": "No significant wear affecting the card slots or overall structure.",
+      "concerns": []
+    },
+    "recommended_additional_angles": [
+      "None, all critical views are covered."
+    ],
+    "marketplace_assessment": {
+      "completeness": "complete",
+      "cleanliness": "clean",
+      "cosmetic_grade": "B",
+      "major_concerns": [
+        "Minor scuffs and discoloration"
+      ],
+      "selling_points": [
+        "Good condition, functional, stylish design"
+      ]
+    },
+    "overall_confidence": 0.92,
+    "detailed_notes": "The wallet shows minor wear typical for its use. The leather exterior has minor scuffs, and the metal interior shows slight discoloration. Functionality is unaffected, and the wallet remains stylish and practical.",
+    "processing_time_ms": null,
+    "detail_level_used": "detailed",
+    "angles_analyzed": 7,
+    "category": "clothing and accessories"
+  },
+  "comprehensive_description": "This is a VULKIT Leather card holder wallet with RFID protection. It is made of Leather exterior with metal interior, in Black, sized Standard wallet size, approximately 4 x 3 inches. Overall condition is Good. The wallet is in good condition with minor cosmetic wear, typical for its use. Overall, the wallet is in good condition with minor cosmetic wear. The item appears to be fully functional. No significant wear affecting the card slots or overall structure. Item is complete.",
+  "marketplace_listing_ready": {
+    "title_suggestion": "VULKIT Leather Card Holder Wallet With Rfid Protection (Good Condition)",
+    "condition_summary": "Good condition (Grade B) with minimal wear.",
+    "key_selling_points": [
+      "Good condition, functional, stylish design",
+      "Fully functional",
+      "Genuine VULKIT brand",
+      "Complete with all parts"
+    ],
+    "buyer_concerns": [
+      "Minor scuffs and discoloration"
+    ],
+    "estimated_grade": "B"
+  },
+  "raw_data": {
+    "tier1_complete": {
+      "category": "clothing and accessories",
+      "confidence": 0.95,
+      "alternatives": [
+        {
+          "category": "jewelry and watches",
+          "confidence": 0.03
+        },
+        {
+          "category": "office supplies",
+          "confidence": 0.02
+        }
+      ],
+      "reasoning": "The item in the image is a wallet, which is typically classified under clothing and accessories as it is a personal item used to carry money and cards.",
+      "processing_time_ms": null
+    },
+    "tier2_complete": {
+      "images_analyzed": 7,
+      "angle_coverage": "Top, bottom, side, open, and closed views of the wallet.",
+      "brand": "VULKIT",
+      "brand_confidence": 0.95,
+      "brand_source": "Images 1, 2, and 6 showed the brand clearly on the wallet.",
+      "stickers_present": [],
+      "product_type": "Leather card holder wallet with RFID protection",
+      "product_type_confidence": 0.92,
+      "material": "Leather exterior with metal interior",
+      "color": "Black",
+      "size_or_dimensions": "Standard wallet size, approximately 4 x 3 inches",
+      "condition": "Good",
+      "condition_confidence": 0.9,
+      "visible_text_found": [
+        "VULKIT (Images 1, 2, 6)",
+        "Text on paper inside wallet (Image 4, 5, 7)"
+      ],
+      "product_specific_wear_analysis": {
+        "product_identified": "VULKIT Leather Card Holder Wallet",
+        "typical_wear_points_for_this_product": [
+          "Leather exterior can show scratches or scuffs",
+          "Metal interior can show dents or discoloration",
+          "Card slots can become loose over time"
+        ],
+        "inspection_results_by_angle": [
+          {
+            "wear_point": "leather exterior",
+            "visible_in_images": [
+              1,
+              2,
+              5
+            ],
+            "status": "good",
+            "details": "Minor scuffs visible, no major scratches",
+            "severity": "minor",
+            "affects_function": false
+          },
+          {
+            "wear_point": "metal interior",
+            "visible_in_images": [
+              3,
+              4,
+              7
+            ],
+            "status": "good",
+            "details": "Slight discoloration, no dents",
+            "severity": "minor",
+            "affects_function": false
+          }
+        ],
+        "multi_angle_benefits": "Multiple angles confirmed minor scuffs on leather and slight discoloration on metal.",
+        "summary": "Overall, the wallet is in good condition with minor cosmetic wear."
+      },
+      "general_physical_damage_by_angle": {
+        "image_1": [
+          "Minor scuffs on leather"
+        ],
+        "image_2": [
+          "Minor scuffs on leather"
+        ],
+        "image_3": [
+          "Slight discoloration on metal interior"
+        ],
+        "combined_summary": [
+          "Minor scuffs on leather exterior, slight discoloration on metal interior, no major damage."
+        ]
+      },
+      "overall_wear_assessment": "The wallet is in good condition with minor cosmetic wear, typical for its use.",
+      "functionality_assessment": {
+        "appears_functional": true,
+        "confidence": 0.85,
+        "reasoning": "No significant wear affecting the card slots or overall structure.",
+        "concerns": []
+      },
+      "recommended_additional_angles": [
+        "None, all critical views are covered."
+      ],
+      "marketplace_assessment": {
+        "completeness": "complete",
+        "cleanliness": "clean",
+        "cosmetic_grade": "B",
+        "major_concerns": [
+          "Minor scuffs and discoloration"
+        ],
+        "selling_points": [
+          "Good condition, functional, stylish design"
+        ]
+      },
+      "overall_confidence": 0.92,
+      "detailed_notes": "The wallet shows minor wear typical for its use. The leather exterior has minor scuffs, and the metal interior shows slight discoloration. Functionality is unaffected, and the wallet remains stylish and practical.",
+      "processing_time_ms": null,
+      "detail_level_used": "detailed",
+      "angles_analyzed": 7,
+      "category": "clothing and accessories"
+    }
+  }
+}

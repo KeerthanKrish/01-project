@@ -44,7 +44,7 @@ def count_objects_with_gpt_base64(base64_image: str, api_key: str):
                     "content": [
                         {
                             "type": "text",
-                            "text": "Count the number of distinct objects in this image. Return ONLY a single number representing the count. Do not include any explanation or additional text."
+                            "text": "Count the number of primary product objects in the foreground. Ignore background items, hands, furniture, shelves, or clutter. Treat accessories or packaging that belong to the product as part of the main product. Return ONLY a single number and nothing else."
                         },
                         {
                             "type": "image_url",

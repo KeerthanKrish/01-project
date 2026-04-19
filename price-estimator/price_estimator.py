@@ -13,11 +13,13 @@ from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from openai import OpenAI
 from pydantic import BaseModel, Field
+import requests
 
 
 load_dotenv()
 
 app = FastAPI(title="Price Estimator API", version="1.0.0")
+CONVEX_HTTP_URL = os.getenv("CONVEX_HTTP_URL")
 
 
 class PriceEstimateRequest(BaseModel):
@@ -122,6 +124,50 @@ def estimate_price(analysis: Dict[str, Any]) -> Dict[str, Any]:
     }
 
 
+def save_price_to_convex(analysis: Dict[str, Any], market_research: Dict[str, Any]) -> None:
+    if not CONVEX_HTTP_URL:
+        return
+
+    try:
+        analysis_id = analysis.get("analysis_id")
+        if not analysis_id:
+            analysis_id = analysis.get("analysis_timestamp", "")
+
+        tier2 = analysis.get("tier2", {})
+        listing = analysis.get("listing", {})
+
+        payload = {
+            "analysisId": str(analysis_id),
+            "estimateJson": market_research,
+            "category": analysis.get("category", {}).get("name", ""),
+            "brand": tier2.get("brand", ""),
+            "productType": tier2.get("product_type", ""),
+            "condition": tier2.get("condition", ""),
+            "color": tier2.get("color", ""),
+            "material": tier2.get("material", ""),
+            "imagesAnalyzed": int(analysis.get("images_analyzed", 0) or 0),
+            "marketplaceSuitable": bool(analysis.get("marketplace_suitable")),
+            "analysisTimestamp": str(analysis.get("analysis_timestamp", "")),
+            "title": str(listing.get("title", "")),
+            "recommendedPrice": market_research.get("recommended_price", 0),
+            "minPrice": market_research.get("price_range", {}).get("min", 0),
+            "maxPrice": market_research.get("price_range", {}).get("max", 0),
+            "createdAt": int(datetime.now().timestamp() * 1000),
+        }
+
+        res = requests.post(
+            f"{CONVEX_HTTP_URL.rstrip('/')}/api/save-price-estimate",
+            json=payload,
+            timeout=10,
+        )
+        if not res.ok:
+            print(f"⚠️ Convex price save failed: {res.status_code} {res.text}")
+        else:
+            print(f"✅ Convex price saved: {res.json().get('id', 'ok')}")
+    except Exception as exc:
+        print(f"⚠️ Convex price save failed: {exc}")
+
+
 @app.get("/health")
 def health_check() -> Dict[str, Any]:
     return {"status": "ok"}
@@ -132,6 +178,7 @@ def estimate(request: PriceEstimateRequest) -> PriceEstimateResponse:
     market_research = estimate_price(request.analysis)
     updated = dict(request.analysis)
     updated["market_research"] = market_research
+    save_price_to_convex(updated, market_research)
     return PriceEstimateResponse(analysis=updated, market_research=market_research)
 
 

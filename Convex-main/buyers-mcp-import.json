@@ -1,0 +1,14 @@
+{
+  "buyers": [
+    {
+      "name": "Alex Rivera",
+      "address": "100 Market St, SF, CA",
+      "email": "alex@example.com"
+    },
+    {
+      "name": "Jordan Lee",
+      "address": "22 Oak Ave, Austin, TX",
+      "email": "jordan@example.com"
+    }
+  ]
+}

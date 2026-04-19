@@ -24,6 +24,8 @@ from PIL import Image
 import io
 from datetime import datetime
 from dotenv import load_dotenv
+import os
+import requests
 
 from detector import MarketplaceDetector
 
@@ -51,6 +53,36 @@ app.add_middleware(
 print("Initializing detector...")
 detector = MarketplaceDetector()
 print("Detector ready!")
+
+CONVEX_HTTP_URL = os.getenv("CONVEX_HTTP_URL")
+
+
+def _save_analysis_to_convex(response_payload: dict) -> None:
+    if not CONVEX_HTTP_URL:
+        return
+
+    try:
+        tier2 = response_payload.get("tier2") or {}
+        payload = {
+            "analysisJson": response_payload,
+            "category": response_payload.get("category", {}).get("name", ""),
+            "brand": tier2.get("brand", ""),
+            "productType": tier2.get("product_type", ""),
+            "marketplaceSuitable": bool(response_payload.get("marketplace_suitable")),
+            "createdAt": int(datetime.now().timestamp() * 1000),
+        }
+
+        res = requests.post(
+            f"{CONVEX_HTTP_URL.rstrip('/')}/api/save-analysis",
+            json=payload,
+            timeout=10,
+        )
+        if not res.ok:
+            print(f"⚠️ Convex analysis save failed: {res.status_code} {res.text}")
+        else:
+            print(f"✅ Convex analysis saved: {res.json().get('id', 'ok')}")
+    except Exception as exc:
+        print(f"⚠️ Convex save failed: {exc}")
 
 
 @app.get("/")
@@ -193,6 +225,7 @@ async def analyze_images(
             }
         
         print(f"✅ Analysis complete: {response['category']['name']}")
+        _save_analysis_to_convex(response)
         
         return JSONResponse(content=response)
         

@@ -1,0 +1,39 @@
+{
+  "records": [
+    {
+      "user": {
+        "name": "Sam Chen",
+        "address": "5 Pine Rd, Seattle, WA",
+        "email": "sam@example.com"
+      },
+      "listing": {
+        "description": "Vintage desk lamp with brass finish",
+        "price": 49.99
+      }
+    },
+    {
+      "user": {
+        "name": "Sam Chen",
+        "address": "5 Pine Rd, Seattle, WA",
+        "email": "sam@example.com"
+      },
+      "listing": {
+        "description": "Oak coffee table, seats four",
+        "price": 120,
+        "status": "available"
+      }
+    },
+    {
+      "user": {
+        "name": "Riley Patel",
+        "address": "9 Elm St, Denver, CO",
+        "email": "riley@example.com"
+      },
+      "listing": {
+        "description": "Wireless noise-cancelling headphones",
+        "price": 199.99,
+        "status": "available"
+      }
+    }
+  ]
+}

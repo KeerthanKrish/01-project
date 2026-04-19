@@ -157,34 +157,6 @@
             border-color: #667eea;
         }
 
-        .detail-controls {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
-        }
-
-        .detail-btn {
-            padding: 10px;
-            background: #f3f4f6;
-            border: 2px solid #e5e7eb;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            font-weight: 500;
-            color: #374151;
-            font-size: 0.9em;
-        }
-
-        .detail-btn:hover {
-            background: #e5e7eb;
-        }
-
-        .detail-btn.active {
-            background: #10b981;
-            color: white;
-            border-color: #10b981;
-        }
-
         .flash-btn {
             position: absolute;
             top: 20px;
@@ -620,15 +592,6 @@
                         </div>
                     </div>
 
-                    <div class="control-group">
-                        <div class="control-label">🔍 Analysis Detail Level</div>
-                        <div class="detail-controls">
-                            <button class="detail-btn" data-detail="quick">Quick</button>
-                            <button class="detail-btn active" data-detail="normal">Normal</button>
-                            <button class="detail-btn" data-detail="detailed">Detailed</button>
-                        </div>
-                    </div>
-
                     <div class="button-group">
                         <button id="captureBtn" class="capture-btn" style="flex: 1;">
                             📸 Add Photo
@@ -667,7 +630,7 @@
                     <div class="placeholder">
                         <div class="placeholder-icon">📦</div>
                         <p>Capture an image to see detection results</p>
-                        <p style="font-size: 0.9em; margin-top: 10px;">Adjust rotation and detail level before capturing</p>
+                        <p style="font-size: 0.9em; margin-top: 10px;">Using detailed analysis mode</p>
                     </div>
                 </div>
             </div>
@@ -688,10 +651,12 @@
         const resultsDiv = document.getElementById('results');
         
         let currentRotation = 0;
-        let currentDetailLevel = 'normal';
         let capturedImages = [];
         let flashEnabled = false;
         let videoTrack = null;
+
+        // Always use detailed analysis mode
+        let currentDetailLevel = 'detailed';
 
         // Rotation control
         document.querySelectorAll('.rotation-btn').forEach(btn => {
@@ -702,15 +667,6 @@
                 
                 // Update webcam display rotation
                 webcam.style.transform = `rotate(${currentRotation}deg)`;
-            });
-        });
-
-        // Detail level control
-        document.querySelectorAll('.detail-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                document.querySelectorAll('.detail-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                currentDetailLevel = btn.dataset.detail;
             });
         });
 

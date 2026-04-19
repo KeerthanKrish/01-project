@@ -88,3 +88,7 @@ images/*.webp
 # Analysis JSON outputs (user data - exclude from git)
 jsons/*.json
 !jsons/.gitkeep
+
+# Search optimization payloads (user data - exclude from git)
+search_jsons/*.json
+!search_jsons/.gitkeep

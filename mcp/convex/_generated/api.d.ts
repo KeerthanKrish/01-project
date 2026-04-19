@@ -14,7 +14,18 @@ import type {
   FunctionReference,
 } from "convex/server";
 
-declare const fullApi: ApiFromModules<{}>;
+/**
+ * Marketplace module
+ */
+export declare const marketplace: {
+  searchProducts: FunctionReference<"query", "public", { query: string }, any>;
+  generatePayment: FunctionReference<"mutation", "public", { id: string }, any>;
+  confirmSale: FunctionReference<"mutation", "public", { id: string; name: string; address: string; email: string }, any>;
+};
+
+declare const fullApi: ApiFromModules<{
+  marketplace: typeof marketplace;
+}>;
 
 /**
  * A utility for referencing Convex functions in your app's public API.
@@ -27,7 +38,9 @@ declare const fullApi: ApiFromModules<{}>;
 export declare const api: FilterApi<
   typeof fullApi,
   FunctionReference<any, "public">
->;
+> & {
+  marketplace: typeof marketplace;
+};
 
 /**
  * A utility for referencing Convex functions in your app's internal API.

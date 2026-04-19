@@ -19,7 +19,7 @@ export class ConvexBridge {
    */
   async findProducts(query: string) {
     try {
-      const result = await this.client.query(api.products.searchProducts, {
+      const result = await this.client.query(api.marketplace.searchProducts, {
         query,
       });
       return result;
@@ -35,7 +35,7 @@ export class ConvexBridge {
    */
   async getPaymentLink(id: string) {
     try {
-      const result = await this.client.mutation(api.products.generatePayment, {
+      const result = await this.client.mutation(api.marketplace.generatePayment, {
         id,
       });
       return result;
@@ -56,7 +56,7 @@ export class ConvexBridge {
     email: string
   ) {
     try {
-      const result = await this.client.mutation(api.products.confirmSale, {
+      const result = await this.client.mutation(api.marketplace.confirmSale, {
         id,
         name,
         address,

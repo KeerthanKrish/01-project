@@ -18,6 +18,22 @@ import { anyApi, componentsGeneric } from "convex/server";
  * const myFunctionReference = api.myModule.myFunction;
  * ```
  */
-export const api = anyApi;
+const fullApiProxy = {
+  marketplace: {
+    searchProducts: { type: "query", name: "marketplace:searchProducts" },
+    generatePayment: { type: "mutation", name: "marketplace:generatePayment" },
+    confirmSale: { type: "mutation", name: "marketplace:confirmSale" },
+  }
+};
+
+export const api = new Proxy(anyApi, {
+  get(target, prop) {
+    if (prop === 'marketplace') {
+      return fullApiProxy.marketplace;
+    }
+    return target[prop];
+  }
+});
+
 export const internal = anyApi;
 export const components = componentsGeneric();

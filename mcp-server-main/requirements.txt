@@ -1,0 +1,9 @@
+# MCP Server dependencies
+mcp[cli]>=1.2.0
+fastmcp>=0.1.0
+
+# Convex Python SDK
+convex>=0.5.0
+
+# Additional utilities
+python-dotenv>=1.0.0

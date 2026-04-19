@@ -9,7 +9,7 @@ import requests
 from pathlib import Path
 
 # API base URL
-API_URL = "http://localhost:8000"
+API_URL = "http://localhost:8001"
 
 
 def test_health():
@@ -116,29 +116,29 @@ CURL_EXAMPLES = """
 ================================================================================
 
 1. Health Check:
-   curl http://localhost:8000/api/health
+    curl http://localhost:8001/api/health
 
 2. Analyze Single Image:
-   curl -X POST http://localhost:8000/api/analyze \\
+    curl -X POST http://localhost:8001/api/analyze \\
         -F "images=@product.jpg"
 
 3. Analyze Multiple Images:
-   curl -X POST http://localhost:8000/api/analyze \\
+    curl -X POST http://localhost:8001/api/analyze \\
         -F "images=@front.jpg" \\
         -F "images=@back.jpg" \\
         -F "images=@damage.jpg"
 
 4. Get Analysis by ID:
-   curl http://localhost:8000/api/analysis/20260418_143000
+    curl http://localhost:8001/api/analysis/20260418_143000
 
 5. Get Search Payload by ID:
-   curl http://localhost:8000/api/search/20260418_143000
+    curl http://localhost:8001/api/search/20260418_143000
 
 6. List Recent Analyses:
-   curl http://localhost:8000/api/analyses?limit=10
+    curl http://localhost:8001/api/analyses?limit=10
 
 7. View API Documentation:
-   Open in browser: http://localhost:8000/docs
+    Open in browser: http://localhost:8001/docs
    
 ================================================================================
 """

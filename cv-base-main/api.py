@@ -12,10 +12,10 @@ Endpoints:
 - GET /api/search/{analysis_id} - Get search payload by ID
 
 Usage:
-    uvicorn api:app --reload --host 0.0.0.0 --port 8000
+    uvicorn api:app --reload --host 0.0.0.0 --port 8001
 
-Then access API at: http://localhost:8000
-API docs at: http://localhost:8000/docs
+Then access API at: http://localhost:8001
+API docs at: http://localhost:8001/docs
 """
 
 from fastapi import FastAPI, File, UploadFile, HTTPException
@@ -107,7 +107,7 @@ async def analyze_images(
         - file_paths: Paths to saved JSON files
         
     Example:
-        curl -X POST "http://localhost:8000/api/analyze" \\
+        curl -X POST "http://localhost:8001/api/analyze" \\
              -F "images=@product1.jpg" \\
              -F "images=@product2.jpg"
     """
@@ -225,7 +225,7 @@ async def get_analysis(analysis_id: str):
         Complete analysis JSON
         
     Example:
-        curl "http://localhost:8000/api/analysis/20260418_143000"
+        curl "http://localhost:8001/api/analysis/20260418_143000"
     """
     try:
         json_path = JSONS_FOLDER / f"analysis_{analysis_id}.json"
@@ -262,7 +262,7 @@ async def get_search_payload(analysis_id: str):
         Search optimization payload JSON
         
     Example:
-        curl "http://localhost:8000/api/search/20260418_143000"
+        curl "http://localhost:8001/api/search/20260418_143000"
     """
     try:
         json_path = SEARCH_JSONS_FOLDER / f"search_{analysis_id}.json"
@@ -299,7 +299,7 @@ async def list_analyses(limit: int = 20):
         List of analysis IDs with metadata
         
     Example:
-        curl "http://localhost:8000/api/analyses?limit=10"
+        curl "http://localhost:8001/api/analyses?limit=10"
     """
     try:
         # Get all analysis files
@@ -350,9 +350,9 @@ if __name__ == "__main__":
     print("MARKETPLACE DETECTION API")
     print("="*70)
     print("\nStarting FastAPI server...")
-    print("   API: http://localhost:8000")
-    print("   Docs: http://localhost:8000/docs")
-    print("   ReDoc: http://localhost:8000/redoc")
+    print("   API: http://localhost:8001")
+    print("   Docs: http://localhost:8001/docs")
+    print("   ReDoc: http://localhost:8001/redoc")
     print("\nEndpoints:")
     print("   POST /api/analyze - Analyze images")
     print("   GET  /api/health - Health check")
@@ -362,4 +362,4 @@ if __name__ == "__main__":
     print("\nPress Ctrl+C to stop\n")
     print("="*70 + "\n")
     
-    uvicorn.run(app, host="0.0.0.0", port=8000, log_level="info")
+    uvicorn.run(app, host="0.0.0.0", port=8001, log_level="info")

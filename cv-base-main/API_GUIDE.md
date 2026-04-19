@@ -13,13 +13,13 @@ Or with auto-reload for development:
 uvicorn api:app --reload
 ```
 
-Server will start at: **http://localhost:8000**
+Server will start at: **http://localhost:8001**
 
 ### 2. View Interactive Documentation
 
 Open in your browser:
-- **Swagger UI**: http://localhost:8000/docs
-- **ReDoc**: http://localhost:8000/redoc
+- **Swagger UI**: http://localhost:8001/docs
+- **ReDoc**: http://localhost:8001/redoc
 
 ## API Endpoints
 
@@ -30,7 +30,7 @@ Upload one or more images and get comprehensive analysis.
 
 **Request:**
 ```bash
-curl -X POST http://localhost:8000/api/analyze \
+curl -X POST http://localhost:8001/api/analyze \
      -F "images=@product1.jpg" \
      -F "images=@product2.jpg"
 ```
@@ -73,7 +73,7 @@ curl -X POST http://localhost:8000/api/analyze \
 **Health check**
 
 ```bash
-curl http://localhost:8000/api/health
+curl http://localhost:8001/api/health
 ```
 
 **Response:**
@@ -92,7 +92,7 @@ curl http://localhost:8000/api/health
 **Retrieve saved analysis**
 
 ```bash
-curl http://localhost:8000/api/analysis/20260418_143000
+curl http://localhost:8001/api/analysis/20260418_143000
 ```
 
 **Response:** Full comprehensive analysis JSON
@@ -103,7 +103,7 @@ curl http://localhost:8000/api/analysis/20260418_143000
 **Retrieve search payload**
 
 ```bash
-curl http://localhost:8000/api/search/20260418_143000
+curl http://localhost:8001/api/search/20260418_143000
 ```
 
 **Response:** Search optimization payload JSON
@@ -114,7 +114,7 @@ curl http://localhost:8000/api/search/20260418_143000
 **List recent analyses**
 
 ```bash
-curl http://localhost:8000/api/analyses?limit=10
+curl http://localhost:8001/api/analyses?limit=10
 ```
 
 **Response:**
@@ -144,7 +144,7 @@ files = [
     ('images', open('front.jpg', 'rb')),
     ('images', open('back.jpg', 'rb'))
 ]
-response = requests.post('http://localhost:8000/api/analyze', files=files)
+response = requests.post('http://localhost:8001/api/analyze', files=files)
 result = response.json()
 
 print(f"Category: {result['category']['name']}")
@@ -191,6 +191,6 @@ print(f"Condition: {result['product']['condition']}")
 ## Port Configuration
 
 - Flask App: `http://localhost:5000`
-- FastAPI: `http://localhost:8000`
+- FastAPI: `http://localhost:8001`
 
 Both can run simultaneously on different ports!

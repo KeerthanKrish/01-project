@@ -3,6 +3,9 @@ import base64
 import os
 import json
 from openai import OpenAI
+from dotenv import load_dotenv
+
+load_dotenv()
 
 def encode_image_to_base64(image_path):
     """Read and encode image to base64 string."""

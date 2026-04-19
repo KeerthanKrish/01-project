@@ -7,6 +7,9 @@ import tempfile
 import numpy as np
 from openai import OpenAI
 from pydantic import BaseModel
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app = FastAPI(title="Object Detection API", version="1.0.0")
 
@@ -114,7 +117,8 @@ async def detect_objects(file: UploadFile = File(...)):
             detail="OPENAI_API_KEY environment variable not set"
         )
     
-    if not file.content_type.startswith('image/'):
+    content_type = file.content_type or ""
+    if not content_type.startswith('image/'):
         raise HTTPException(
             status_code=400,
             detail="File must be an image"

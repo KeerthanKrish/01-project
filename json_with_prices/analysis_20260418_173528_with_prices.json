@@ -1,0 +1,373 @@
+{
+  "analysis_metadata": {
+    "timestamp": "2026-04-18T17:35:28.062054",
+    "analysis_id": "20260418_173528",
+    "backend": "OpenAI Vision",
+    "detail_level": "detailed",
+    "rotation_applied": 0,
+    "images_analyzed": 8,
+    "saved_image_paths": [
+      "images\\capture_20260418_173508_1of8_r0.jpg",
+      "images\\capture_20260418_173508_2of8_r0.jpg",
+      "images\\capture_20260418_173508_3of8_r0.jpg",
+      "images\\capture_20260418_173508_4of8_r0.jpg",
+      "images\\capture_20260418_173508_5of8_r0.jpg",
+      "images\\capture_20260418_173508_6of8_r0.jpg",
+      "images\\capture_20260418_173508_7of8_r0.jpg",
+      "images\\capture_20260418_173508_8of8_r0.jpg"
+    ]
+  },
+  "tier1_category_detection": {
+    "category": "clothing and accessories",
+    "confidence": 0.95,
+    "reasoning": "The image shows the sole of a shoe, which falls under clothing and accessories.",
+    "all_predictions": [],
+    "processing_time_ms": null
+  },
+  "tier2_detailed_analysis": {
+    "images_analyzed": 8,
+    "angle_coverage": "The images provide views of the shoe from the bottom, side, top, front, and back angles.",
+    "brand": "Nike",
+    "brand_confidence": 0.95,
+    "brand_source": "Images 1, 2, 3, 5, and 8 show the Nike logo on the sole, side, tongue, and heel.",
+    "stickers_present": [],
+    "product_type": "Nike low-top sneaker",
+    "product_type_confidence": 0.92,
+    "material": "Leather and synthetic",
+    "color": "White with black accents",
+    "size_or_dimensions": "Not visible",
+    "condition": "Good",
+    "condition_confidence": 0.9,
+    "visible_text_found": [
+      "Image 1: 'NIKE' on the sole",
+      "Image 3: 'NIKE' on the tongue",
+      "Image 5: 'NIKE' on the heel",
+      "Image 6: QR code inside the shoe"
+    ],
+    "barcode_sku_found": null,
+    "product_specific_wear_analysis": {
+      "product_identified": "Nike low-top sneaker",
+      "typical_wear_points_for_this_product": [
+        "Sole wear",
+        "Creasing on the toe box",
+        "Wear on the heel",
+        "Lace condition"
+      ],
+      "inspection_results_by_angle": [
+        {
+          "wear_point": "sole",
+          "visible_in_images": [
+            1,
+            2
+          ],
+          "status": "good",
+          "details": "Some dirt and minor wear visible on the sole.",
+          "severity": "minor",
+          "affects_function": false
+        },
+        {
+          "wear_point": "toe box",
+          "visible_in_images": [
+            4,
+            5
+          ],
+          "status": "fair",
+          "details": "Visible creasing and slight discoloration.",
+          "severity": "moderate",
+          "affects_function": false
+        },
+        {
+          "wear_point": "heel",
+          "visible_in_images": [
+            7,
+            8
+          ],
+          "status": "good",
+          "details": "Minor scuffing on the heel.",
+          "severity": "minor",
+          "affects_function": false
+        },
+        {
+          "wear_point": "laces",
+          "visible_in_images": [
+            3,
+            5
+          ],
+          "status": "good",
+          "details": "Laces appear clean and intact.",
+          "severity": "none",
+          "affects_function": false
+        }
+      ],
+      "multi_angle_benefits": "Multiple angles revealed minor wear on the sole and creasing on the toe box.",
+      "summary": "Overall, the sneakers show typical wear for used shoes, with minor sole wear and moderate creasing on the toe box."
+    },
+    "general_physical_damage_by_angle": {
+      "image_1": [
+        "Minor dirt on the sole"
+      ],
+      "image_2": [
+        "Minor dirt on the sole"
+      ],
+      "image_3": [
+        "Clean laces, slight creasing on the toe box"
+      ],
+      "image_4": [
+        "Visible creasing on the toe box"
+      ],
+      "image_5": [
+        "Minor scuffing on the heel"
+      ],
+      "image_6": [
+        "Clean interior"
+      ],
+      "image_7": [
+        "Minor scuffing on the heel"
+      ],
+      "image_8": [
+        "Minor scuffing on the heel"
+      ]
+    },
+    "combined_summary": [
+      "Minor dirt on the sole",
+      "Moderate creasing on the toe box",
+      "Minor scuffing on the heel"
+    ],
+    "overall_wear_assessment": "The sneakers are in good condition with minor wear on the sole, moderate creasing on the toe box, and minor scuffing on the heel.",
+    "functionality_assessment": {
+      "appears_functional": true,
+      "confidence": 0.85,
+      "reasoning": "The wear observed does not affect the functionality of the sneakers.",
+      "concerns": []
+    },
+    "recommended_additional_angles": [
+      "An image showing the size label would be helpful."
+    ],
+    "marketplace_assessment": {
+      "completeness": "complete",
+      "cleanliness": "good",
+      "cosmetic_grade": "B",
+      "major_concerns": [
+        "Moderate creasing on the toe box"
+      ],
+      "selling_points": [
+        "Recognizable brand",
+        "Good overall condition"
+      ]
+    },
+    "overall_confidence": 0.92,
+    "detailed_notes": "The assessment uses all 8 angles to evaluate the condition of the Nike sneakers, focusing on typical wear points such as the sole, toe box, and heel. The sneakers are in good condition with minor cosmetic issues.",
+    "processing_time_ms": null,
+    "detail_level_used": "detailed",
+    "angles_analyzed": 8,
+    "category": "clothing and accessories"
+  },
+  "barcode_lookup": {
+    "found": false,
+    "message": "No barcode/SKU detected in images"
+  },
+  "comprehensive_description": "This is a Nike Nike low-top sneaker. It is made of Leather and synthetic, in White with black accents, sized Not visible. Overall condition is Good. The sneakers are in good condition with minor wear on the sole, moderate creasing on the toe box, and minor scuffing on the heel. Overall, the sneakers show typical wear for used shoes, with minor sole wear and moderate creasing on the toe box. The item appears to be fully functional. The wear observed does not affect the functionality of the sneakers. Item is complete.",
+  "marketplace_listing_ready": {
+    "title_suggestion": "Nike Nike Low-Top Sneaker (Good Condition)",
+    "condition_summary": "Good condition (Grade B) with minimal wear.",
+    "key_selling_points": [
+      "Recognizable brand",
+      "Good overall condition",
+      "Fully functional",
+      "Genuine Nike brand",
+      "Complete with all parts"
+    ],
+    "buyer_concerns": [
+      "Moderate creasing on the toe box"
+    ],
+    "estimated_grade": "B"
+  },
+  "raw_data": {
+    "tier1_complete": {
+      "category": "clothing and accessories",
+      "confidence": 0.95,
+      "alternatives": [
+        {
+          "category": "sports and recreation",
+          "confidence": 0.03
+        },
+        {
+          "category": "health and beauty",
+          "confidence": 0.02
+        }
+      ],
+      "reasoning": "The image shows the sole of a shoe, which falls under clothing and accessories.",
+      "marketplace_suitable": true,
+      "suitability_reasoning": "The item appears to be in usable condition and is not classified as trash or hazardous material, making it suitable for resale.",
+      "processing_time_ms": null
+    },
+    "tier2_complete": {
+      "images_analyzed": 8,
+      "angle_coverage": "The images provide views of the shoe from the bottom, side, top, front, and back angles.",
+      "brand": "Nike",
+      "brand_confidence": 0.95,
+      "brand_source": "Images 1, 2, 3, 5, and 8 show the Nike logo on the sole, side, tongue, and heel.",
+      "stickers_present": [],
+      "product_type": "Nike low-top sneaker",
+      "product_type_confidence": 0.92,
+      "material": "Leather and synthetic",
+      "color": "White with black accents",
+      "size_or_dimensions": "Not visible",
+      "condition": "Good",
+      "condition_confidence": 0.9,
+      "visible_text_found": [
+        "Image 1: 'NIKE' on the sole",
+        "Image 3: 'NIKE' on the tongue",
+        "Image 5: 'NIKE' on the heel",
+        "Image 6: QR code inside the shoe"
+      ],
+      "barcode_sku_found": null,
+      "product_specific_wear_analysis": {
+        "product_identified": "Nike low-top sneaker",
+        "typical_wear_points_for_this_product": [
+          "Sole wear",
+          "Creasing on the toe box",
+          "Wear on the heel",
+          "Lace condition"
+        ],
+        "inspection_results_by_angle": [
+          {
+            "wear_point": "sole",
+            "visible_in_images": [
+              1,
+              2
+            ],
+            "status": "good",
+            "details": "Some dirt and minor wear visible on the sole.",
+            "severity": "minor",
+            "affects_function": false
+          },
+          {
+            "wear_point": "toe box",
+            "visible_in_images": [
+              4,
+              5
+            ],
+            "status": "fair",
+            "details": "Visible creasing and slight discoloration.",
+            "severity": "moderate",
+            "affects_function": false
+          },
+          {
+            "wear_point": "heel",
+            "visible_in_images": [
+              7,
+              8
+            ],
+            "status": "good",
+            "details": "Minor scuffing on the heel.",
+            "severity": "minor",
+            "affects_function": false
+          },
+          {
+            "wear_point": "laces",
+            "visible_in_images": [
+              3,
+              5
+            ],
+            "status": "good",
+            "details": "Laces appear clean and intact.",
+            "severity": "none",
+            "affects_function": false
+          }
+        ],
+        "multi_angle_benefits": "Multiple angles revealed minor wear on the sole and creasing on the toe box.",
+        "summary": "Overall, the sneakers show typical wear for used shoes, with minor sole wear and moderate creasing on the toe box."
+      },
+      "general_physical_damage_by_angle": {
+        "image_1": [
+          "Minor dirt on the sole"
+        ],
+        "image_2": [
+          "Minor dirt on the sole"
+        ],
+        "image_3": [
+          "Clean laces, slight creasing on the toe box"
+        ],
+        "image_4": [
+          "Visible creasing on the toe box"
+        ],
+        "image_5": [
+          "Minor scuffing on the heel"
+        ],
+        "image_6": [
+          "Clean interior"
+        ],
+        "image_7": [
+          "Minor scuffing on the heel"
+        ],
+        "image_8": [
+          "Minor scuffing on the heel"
+        ]
+      },
+      "combined_summary": [
+        "Minor dirt on the sole",
+        "Moderate creasing on the toe box",
+        "Minor scuffing on the heel"
+      ],
+      "overall_wear_assessment": "The sneakers are in good condition with minor wear on the sole, moderate creasing on the toe box, and minor scuffing on the heel.",
+      "functionality_assessment": {
+        "appears_functional": true,
+        "confidence": 0.85,
+        "reasoning": "The wear observed does not affect the functionality of the sneakers.",
+        "concerns": []
+      },
+      "recommended_additional_angles": [
+        "An image showing the size label would be helpful."
+      ],
+      "marketplace_assessment": {
+        "completeness": "complete",
+        "cleanliness": "good",
+        "cosmetic_grade": "B",
+        "major_concerns": [
+          "Moderate creasing on the toe box"
+        ],
+        "selling_points": [
+          "Recognizable brand",
+          "Good overall condition"
+        ]
+      },
+      "overall_confidence": 0.92,
+      "detailed_notes": "The assessment uses all 8 angles to evaluate the condition of the Nike sneakers, focusing on typical wear points such as the sole, toe box, and heel. The sneakers are in good condition with minor cosmetic issues.",
+      "processing_time_ms": null,
+      "detail_level_used": "detailed",
+      "angles_analyzed": 8,
+      "category": "clothing and accessories"
+    }
+  },
+  "market_research": {
+    "timestamp": "2026-04-18T21:12:04.034618",
+    "response_id": "resp_055efc6a852eb2710069e439ef14d481a0ab5f7170e7295d1a",
+    "model": "gpt-4o-2024-08-06",
+    "recommended_price": 45.0,
+    "price_range": {
+      "min": 35.0,
+      "max": 60.0
+    },
+    "existing_listings": [
+      {
+        "title": "Nike Mens Blazer Low CZ1089‑100 Black White Leather Sneaker Shoes Size 9.5 (Pre‑owned - Good)",
+        "url": "https://www.ebay.com/itm/376477108730",
+        "price": 35.1,
+        "marketplace": "eBay"
+      },
+      {
+        "title": "Nike Dunk Low Black White (Used, Good Condition)",
+        "url": "https://www.ebay.com/b/Nike-Dunk-Low-Black-White/15709/bn_7118514165",
+        "price": 58.75,
+        "marketplace": "eBay"
+      },
+      {
+        "title": "Nike Leather Colorblock Pattern Athletic Sneakers (Good condition)",
+        "url": "https://www.therealreal.com/designers/nike/men/shoes/sneakers/low-top",
+        "price": 225.0,
+        "marketplace": "The RealReal"
+      }
+    ]
+  }
+}
